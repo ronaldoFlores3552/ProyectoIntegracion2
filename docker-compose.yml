@@ -1,0 +1,14 @@
+services:
+  pipeline:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: proyecto-integrador-2:pipeline
+    working_dir: /workspace
+    environment:
+      TZ: America/Lima
+      PYSPARK_PYTHON: /usr/local/bin/python
+    volumes:
+      - ./:/workspace
+    command: python scripts/validate_environment.py
+

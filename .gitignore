@@ -1,1 +1,29 @@
-docs/
+# Entornos locales y configuracion privada
+.venv*/
+.env
+
+# Datos y productos regenerables
+data/raw/
+data/interim/
+data/processed/
+artifacts/
+
+# Temporales, caches y herramientas locales
+*.part
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+spark-warehouse/
+metastore_db/
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Los documentos recibidos para la consigna permanecen locales; la guía de
+# ejecución sí se versiona.
+docs/*
+#!docs/ComandosEjecutarOrdenReplica.md
