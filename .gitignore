@@ -1,6 +1,7 @@
 # Entornos locales y configuracion privada
 .venv*/
 .env
+.tools/
 
 # Datos y productos regenerables
 data/raw/

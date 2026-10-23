@@ -2,11 +2,15 @@
 
 from __future__ import annotations
 
+import os
 import platform
 import shutil
 import subprocess
 import sys
 from importlib.metadata import PackageNotFoundError, version
+from pathlib import Path
+
+from setup_windows_hadoop import helper_home
 
 REQUIRED_PACKAGES = ("pyspark", "pandas", "numpy", "pyarrow", "scikit-learn", "networkx")
 
@@ -39,6 +43,24 @@ def main() -> int:
     if missing:
         print(f"ERROR: faltan paquetes: {', '.join(missing)}", file=sys.stderr)
         return 1
+
+    if os.name == "nt":
+        hadoop_home = Path(os.environ.get("HADOOP_HOME", helper_home()))
+        required_files = ("winutils.exe", "hadoop.dll")
+        missing_helpers = [
+            filename
+            for filename in required_files
+            if not (hadoop_home / "bin" / filename).is_file()
+        ]
+        if missing_helpers:
+            print(
+                "ERROR: faltan helpers de Hadoop para Spark en Windows: "
+                f"{', '.join(missing_helpers)}. "
+                "Ejecute: python scripts/setup_windows_hadoop.py",
+                file=sys.stderr,
+            )
+            return 1
+        print(f"Hadoop local para Windows: {hadoop_home}")
 
     print("Entorno válido para iniciar el pipeline.")
     return 0
