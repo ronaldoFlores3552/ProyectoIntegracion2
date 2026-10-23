@@ -4,12 +4,13 @@ from __future__ import annotations
 
 import argparse
 import os
+import shutil
 from pathlib import Path
 
 from pyspark.sql import DataFrame, SparkSession
 from pyspark.sql import functions as F
 
-from scripts.setup_windows_hadoop import helper_home
+from scripts.setup_windows_hadoop import helper_home, verify_helpers
 
 
 def parse_args() -> argparse.Namespace:
@@ -45,24 +46,40 @@ def input_paths(input_dir: Path, years: list[str]) -> list[str]:
 
 
 def configure_windows_hadoop() -> Path | None:
-    """Configure the project-local Windows helper before the JVM starts."""
+    """Configure the verified project-local Windows helper before the JVM starts."""
     if os.name != "nt":
         return None
 
-    home = Path(os.environ.get("HADOOP_HOME", helper_home()))
-    binary_dir = home / "bin"
-    required_files = ("winutils.exe", "hadoop.dll")
-    missing = [filename for filename in required_files if not (binary_dir / filename).is_file()]
-    if missing:
-        message = (
-            f"Faltan helpers de Hadoop para Windows: {', '.join(missing)}. "
-            "Ejecute: python scripts/setup_windows_hadoop.py"
-        )
-        raise RuntimeError(message)
+    home = helper_home()
+    external_home = os.environ.get("HADOOP_HOME")
+    if external_home and Path(external_home).resolve() != home.resolve():
+        print(f"Aviso: se ignora HADOOP_HOME={external_home}; se usa el helper del proyecto.")
 
+    problems = verify_helpers(home)
+    if problems:
+        raise RuntimeError("Helpers de Hadoop para Windows no válidos:\n- " + "\n- ".join(problems))
+
+    binary_dir = home / "bin"
     os.environ["HADOOP_HOME"] = str(home)
     os.environ["PATH"] = f"{binary_dir}{os.pathsep}{os.environ['PATH']}"
     return home
+
+
+def staging_dir(output_dir: Path) -> Path:
+    return output_dir.with_name(f".{output_dir.name}.staging")
+
+
+def publish_output(staging: Path, output_dir: Path) -> None:
+    """Replace output_dir with staging only when Spark committed it completely."""
+    if not (staging / "_SUCCESS").is_file():
+        raise RuntimeError(f"Spark no dejó _SUCCESS en {staging}; la salida no se publica.")
+
+    previous = output_dir.with_name(f"{output_dir.name}.previous")
+    shutil.rmtree(previous, ignore_errors=True)
+    if output_dir.exists():
+        output_dir.replace(previous)
+    staging.replace(output_dir)
+    shutil.rmtree(previous, ignore_errors=True)
 
 
 def build_fact_award_item(releases: DataFrame) -> DataFrame:
@@ -114,6 +131,11 @@ def run() -> None:
     args = parse_args()
     paths = input_paths(args.input_dir, args.years)
     output_dir = args.output_dir.resolve()
+    if output_dir.exists() and not args.overwrite:
+        state = "completa" if (output_dir / "_SUCCESS").is_file() else "INCOMPLETA (sin _SUCCESS)"
+        raise FileExistsError(
+            f"La salida ya existe y está {state}: {output_dir}. Use --overwrite para regenerarla."
+        )
     hadoop_home = configure_windows_hadoop()
 
     builder = (
@@ -126,20 +148,31 @@ def run() -> None:
         builder = builder.config("spark.driver.extraLibraryPath", str(hadoop_home / "bin"))
     spark = builder.getOrCreate()
     try:
+        native_loader = spark.sparkContext._jvm.org.apache.hadoop.util.NativeCodeLoader
+        if hadoop_home and not native_loader.isNativeCodeLoaded():
+            raise RuntimeError(
+                "La JVM no cargó hadoop.dll; la escritura fallaría con "
+                "UnsatisfiedLinkError (NativeIO$Windows.access0). "
+                "Ejecute: python scripts/setup_windows_hadoop.py --check"
+            )
+
         releases = spark.read.json(paths)
         fact = build_fact_award_item(releases).where(
             F.col("process_ocid").isNotNull() & F.col("supplier_id").isNotNull()
         )
 
-        write_mode = "overwrite" if args.overwrite else "errorifexists"
+        # Se escribe en un directorio temporal: la ruta final nunca queda a medio escribir.
+        staging = staging_dir(output_dir)
+        shutil.rmtree(staging, ignore_errors=True)
         (
             fact.repartition("source_year")
-            .write.mode(write_mode)
+            .write.mode("overwrite")
             .partitionBy("source_year")
-            .parquet(str(output_dir))
+            .parquet(str(staging))
         )
+        publish_output(staging, output_dir)
 
-        summary = fact.agg(
+        summary = spark.read.parquet(str(output_dir)).agg(
             F.count("*").alias("rows"),
             F.countDistinct("process_ocid").alias("processes"),
             F.countDistinct("award_id").alias("awards"),

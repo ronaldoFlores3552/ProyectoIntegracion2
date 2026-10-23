@@ -1,5 +1,6 @@
 .git
-.venv
+.venv*
+.tools
 data
 artifacts
 __pycache__
@@ -8,4 +9,3 @@ __pycache__
 .vscode
 .idea
 *.ipynb
-
