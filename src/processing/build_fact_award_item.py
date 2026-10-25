@@ -175,7 +175,7 @@ def run() -> None:
         summary = spark.read.parquet(str(output_dir)).agg(
             F.count("*").alias("rows"),
             F.countDistinct("process_ocid").alias("processes"),
-            F.countDistinct("award_id").alias("awards"),
+            F.countDistinct(F.struct(F.col("process_ocid"), F.col("award_id"))).alias("awards"),
             F.countDistinct("supplier_id").alias("suppliers"),
             F.countDistinct("entity_id").alias("entities"),
             F.sum(F.col("item_id").isNull().cast("int")).alias("rows_without_award_item"),

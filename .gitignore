@@ -24,7 +24,9 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Los documentos recibidos para la consigna permanecen locales; la guía de
-# ejecución sí se versiona.
-docs/*
-#!docs/ComandosEjecutarOrdenReplica.md
+# Los documentos recibidos para la consigna e incidencias históricas permanecen
+# locales. La documentación creada para operar y relevar el proyecto se versiona.
+#docs/Proyecto Integrador 2 - 2026 - 2.docx
+#docs/Proyecto2Integrador.md
+#docs/README_HERRAMIENTAS.md
+#docs/ReporteSolucionHadoopWindows.md
