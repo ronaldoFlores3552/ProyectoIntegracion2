@@ -102,7 +102,30 @@ comandos de Python locales.
 
    Punto de control: aparece `Tabla creada:` y el comando termina con código 0.
 
-9. Compruebe las publicaciones completas.
+9. Construya las interacciones anuales por proveedor y categoría.
+
+   ~~~bash
+   docker compose run --rm pipeline python -m src.features.build_interactions --overwrite
+   ~~~
+
+   Punto de control: aparecen dos líneas `Tabla creada:` y una
+   `Corrida de interacciones:`. El comando termina con código 0.
+
+10. Extraiga evidencia de identidad y construya los artefactos de la Parte I.
+
+    ~~~bash
+    docker compose run --rm pipeline python -m src.processing.build_identity_evidence --years 2023 2024 --overwrite
+    ~~~
+
+    Punto de control: aparece `Evidencia publicada:` y termina con código 0.
+
+    ~~~bash
+    docker compose run --rm pipeline python -m src.features.build_part1 --overwrite
+    ~~~
+
+    Punto de control: aparece `Parte I publicada:` y termina con código 0.
+
+11. Compruebe las publicaciones completas.
 
    ~~~bash
    docker compose run --rm pipeline test -f data/processed/fact_award_item/_SUCCESS
@@ -124,6 +147,30 @@ comandos de Python locales.
 
    ~~~bash
    docker compose run --rm pipeline test -f artifacts/quality/fact_award_item/_SUCCESS
+   ~~~
+
+   Punto de control: termina con código 0 y no imprime errores.
+
+   ~~~bash
+   docker compose run --rm pipeline test -f data/processed/entity_supplier_year/_SUCCESS
+   ~~~
+
+   Punto de control: termina con código 0 y no imprime errores.
+
+   ~~~bash
+   docker compose run --rm pipeline test -f data/processed/entity_category_year/_SUCCESS
+   ~~~
+
+   Punto de control: termina con código 0 y no imprime errores.
+
+   ~~~bash
+   docker compose run --rm pipeline test -f data/processed/identity_evidence/_SUCCESS
+   ~~~
+
+   Punto de control: termina con código 0 y no imprime errores.
+
+   ~~~bash
+   docker compose run --rm pipeline test -f data/processed/part1/_SUCCESS
    ~~~
 
    Punto de control: termina con código 0 y no imprime errores.
@@ -280,7 +327,30 @@ indique un error.
 
     Punto de control: aparece `Tabla creada:` y termina con código 0.
 
-16. Verifique que las publicaciones terminaron completamente.
+16. Construya las interacciones anuales por proveedor y categoría.
+
+    ~~~powershell
+    python -m src.features.build_interactions --overwrite
+    ~~~
+
+    Punto de control: aparecen dos líneas `Tabla creada:` y una
+    `Corrida de interacciones:`. El comando termina con código 0.
+
+17. Extraiga evidencia de identidad y construya los artefactos de la Parte I.
+
+    ~~~powershell
+    python -m src.processing.build_identity_evidence --years 2023 2024 --overwrite
+    ~~~
+
+    Punto de control: aparece `Evidencia publicada:` y termina con código 0.
+
+    ~~~powershell
+    python -m src.features.build_part1 --overwrite
+    ~~~
+
+    Punto de control: aparece `Parte I publicada:` y termina con código 0.
+
+18. Verifique que las publicaciones terminaron completamente.
 
     ~~~powershell
     Test-Path data\processed\fact_award_item\_SUCCESS
@@ -306,6 +376,30 @@ indique un error.
 
     Punto de control: debe devolver `True`. Solo entonces las tablas y el
     perfil están listos para el notebook.
+
+    ~~~powershell
+    Test-Path data\processed\entity_supplier_year\_SUCCESS
+    ~~~
+
+    Punto de control: debe devolver `True`.
+
+    ~~~powershell
+    Test-Path data\processed\entity_category_year\_SUCCESS
+    ~~~
+
+    Punto de control: debe devolver `True`.
+
+    ~~~powershell
+    Test-Path data\processed\identity_evidence\_SUCCESS
+    ~~~
+
+    Punto de control: debe devolver `True`.
+
+    ~~~powershell
+    Test-Path data\processed\part1\_SUCCESS
+    ~~~
+
+    Punto de control: debe devolver `True`.
 
 ## 3. Ruta C — Linux/macOS local (bash)
 
@@ -425,7 +519,30 @@ Java 17; no usa los helpers de Windows.
 
     Punto de control: aparece `Tabla creada:` y termina con código 0.
 
-15. Compruebe las publicaciones completas.
+15. Construya las interacciones anuales por proveedor y categoría.
+
+    ~~~bash
+    python -m src.features.build_interactions --overwrite
+    ~~~
+
+    Punto de control: aparecen dos líneas `Tabla creada:` y una
+    `Corrida de interacciones:`. El comando termina con código 0.
+
+16. Extraiga evidencia de identidad y construya los artefactos de la Parte I.
+
+    ~~~bash
+    python -m src.processing.build_identity_evidence --years 2023 2024 --overwrite
+    ~~~
+
+    Punto de control: aparece `Evidencia publicada:` y termina con código 0.
+
+    ~~~bash
+    python -m src.features.build_part1 --overwrite
+    ~~~
+
+    Punto de control: aparece `Parte I publicada:` y termina con código 0.
+
+17. Compruebe las publicaciones completas.
 
     ~~~bash
     test -f data/processed/fact_award_item/_SUCCESS
@@ -451,17 +568,53 @@ Java 17; no usa los helpers de Windows.
 
     Punto de control: termina con código 0.
 
+    ~~~bash
+    test -f data/processed/entity_supplier_year/_SUCCESS
+    ~~~
+
+    Punto de control: termina con código 0.
+
+    ~~~bash
+    test -f data/processed/entity_category_year/_SUCCESS
+    ~~~
+
+    Punto de control: termina con código 0.
+
+    ~~~bash
+    test -f data/processed/identity_evidence/_SUCCESS
+    ~~~
+
+    Punto de control: termina con código 0.
+
+    ~~~bash
+    test -f data/processed/part1/_SUCCESS
+    ~~~
+
+    Punto de control: termina con código 0.
+
 ## 4. Criterio de éxito común
 
 El flujo técnico y de calidad termina correctamente solo si el comando de
 construcción devuelve código 0, imprime `Tabla creada: ...` y existe
 `data/processed/fact_award_item/_SUCCESS`, debe existir
 `data/processed/fact_award/_SUCCESS` y
-`data/processed/fact_award_supplier/_SUCCESS`; además, el perfil debe imprimir
+`data/processed/fact_award_supplier/_SUCCESS`. Las dos tablas de interacción
+deben contener `_SUCCESS` y sus `_metadata.json` deben tener el mismo `run_id`;
+además, el perfil debe imprimir
 `Perfil publicado: ...` y publicar
 `artifacts/quality/fact_award_item/_SUCCESS`. Spark escribe primero en
 `data/processed/.fact_award_item.staging/` y publica el directorio final solo al
 encontrar `_SUCCESS`.
+
+La extracción de identidad debe imprimir `Evidencia publicada: ...` y crear
+`data/processed/identity_evidence/_SUCCESS` junto con `_metadata.json`. El
+proceso puede tardar varios minutos: espere a que termine y vuelva el prompt.
+Sus grupos son candidatos de revisión, no identidades fusionadas.
+
+La construcción de representaciones debe imprimir `Parte I publicada: ...` y
+crear `data/processed/part1/_SUCCESS`. Por defecto usa adjudicaciones de 2023 a
+2024, cinco vecinos y un límite de 10 millones de pares; consulte su README
+para interpretar el resultado y ajustar recursos.
 
 Como referencia, con los archivos 2023/2024 cuyos SHA-256 figuran en
 `data/raw/manifest.json`, se obtuvieron 137 292 filas, 119 762 procesos, 128 395
@@ -480,6 +633,13 @@ Abra `notebooks/01_calidad_y_eda.ipynb`. El notebook lee los artefactos
 publicados y sirve para gráficos, hipótesis y anotaciones; no reemplaza el
 pipeline ni modifica `data/processed/`.
 
+Para examinar posibles inconsistencias de identificadores y nombres, abra
+`notebooks/02_diagnostico_resolucion_entidades.ipynb` en la misma sesión. Es
+exploratorio: las coincidencias que muestra no se fusionan automáticamente.
+La revisión de referencias sin cruce vuelve a verificar los hashes y leer los
+archivos originales completos; puede tardar varios minutos. La muestra de
+nombres compartidos se ordena de forma determinista y no es representativa.
+
 ## 5. Recuperación de una salida incompleta
 
 - Si falta `_SUCCESS`, ejecute de nuevo el comando de construcción con
@@ -491,6 +651,12 @@ pipeline ni modifica `data/processed/`.
 - Sin `--overwrite`, el script se niega a escribir si la salida ya existe.
 - `--overwrite` solo modifica la salida del comando ejecutado en
   `data/processed/`; nunca toca `data/raw/`.
+- Las interacciones se publican atómicamente por separado. Si falta una salida o
+  sus `_metadata.json` tienen distinto `run_id`, repita `build_interactions`
+  con `--overwrite` para regenerar ambas en la misma corrida.
+- Si se interrumpe la extracción de identidad, puede borrar los directorios
+  sobrantes `.identity_evidence.staging/` e `identity_evidence.previous/` en
+  `data/processed/` y repetir su comando con `--overwrite`.
 
 ## 6. Convenciones de almacenamiento
 
@@ -521,8 +687,13 @@ No modifique manualmente los archivos descargados. El manifiesto conserva la pro
 | `build_fact_award_item` | Disponible | Construye `data/processed/fact_award_item/` (Parte I) |
 | `build_fact_award` | Disponible | Construye `data/processed/fact_award/` con una fila por adjudicación |
 | `build_fact_award_supplier` | Disponible | Construye `data/processed/fact_award_supplier/` con una fila por adjudicación–proveedor |
+| `build_interactions` | Disponible | Publica interacciones anuales por proveedor y categoría y sus metadatos |
+| `build_identity_evidence` | Disponible | Extrae evidencia OCDS y candidatos de identidad sin fusionar ID |
+| `build_part1` | Disponible | Publica vectores, matriz dispersa y grafo KNN con Spark |
 | `profile_fact_award_item` | Disponible | Publica el control técnico de calidad para el notebook de EDA |
 | `01_calidad_y_eda.ipynb` | Disponible | Explora y documenta hallazgos sin alterar tablas oficiales |
+| `02_diagnostico_resolucion_entidades.ipynb` | Disponible | Examina candidatos de identidad sin modificar identificadores |
+| `03_particionamiento_spark.ipynb` | Disponible | Analiza filtros, plan Spark y configuraciones de shuffle |
 | Resto del pipeline Spark | Pendiente | Se añadirá en la siguiente fase |
 | API y frontend | Pendiente | Se añadirán cuando existan artefactos |
 

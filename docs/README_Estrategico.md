@@ -1,11 +1,14 @@
 # Reporte estratégico y bitácora de desarrollo
 
-**Última actualización:** 2026-10-24  
+**Última actualización:** 2026-10-25
+
 **Estado del documento:** vivo; se actualiza, no se reemplaza ni se borra su historial.
 
 ## Propósito y regla de continuidad
 
 Este documento es el mapa de trabajo del Proyecto Integrador 2. Explica el problema, la arquitectura, las herramientas, el orden de desarrollo y el estado real del repositorio. Debe permitir que un compañero o una IA asuma el trabajo sin reconstruir el contexto desde cero.
+
+Para el estado vigente de la Parte I, consultar [README_ParteI.md](README_ParteI.md). El [plan anterior](ReporteYPlanCierreParte1.md) se conserva como historial.
 
 Reglas de actualización:
 
@@ -110,6 +113,7 @@ Proyecto2/
 ├── artifacts/                    # Ignorado: modelos, métricas y JSON de salida
 ├── docs/
 │   ├── README_Estrategico.md     # Este mapa, decisiones y estado
+│   ├── README_ParteI.md          # Resultados, metodología y relevo de la Parte I
 │   ├── ComandosEjecutarOrdenReplica.md
 │   ├── ContratoDatos.md
 │   ├── PlanFase2CalidadEDA.md
@@ -122,14 +126,16 @@ Proyecto2/
 ├── src/
 │   ├── processing/               # Transformación Spark; fact_award_item y fact_award existen
 │   ├── quality/                  # Perfil técnico y reglas de calidad publicadas
-│   ├── features/                 # Planificado: vectores y matrices
+│   ├── features/                 # Interacciones, vectores, matriz y KNN en Spark
 │   ├── graphs/                   # Planificado: grafos y métricas
 │   ├── models/                   # Planificado: modelos y embeddings
 │   ├── evaluation/               # Planificado: métricas y baselines
 │   └── serving/                  # Planificado: carga para API
 ├── tests/                        # Pruebas unitarias e integración acotada
 ├── notebooks/                    # Exploración narrada y gráficos reproducibles
-│   └── 01_calidad_y_eda.ipynb
+│   ├── 01_calidad_y_eda.ipynb
+│   ├── 02_diagnostico_resolucion_entidades.ipynb
+│   └── 03_particionamiento_spark.ipynb
 ├── api/                          # Planificado: FastAPI
 ├── frontend/                     # Planificado: React
 ├── Dockerfile
@@ -167,7 +173,7 @@ Cada fase termina con una salida, criterios de aceptación y una actualización 
 | 0. Gobierno y reproducción | Ejecutar en otra máquina. | Docker, versiones fijadas, guía, validación y pruebas. | Tabla reproducida con _SUCCESS. | Validada en Windows y Docker. |
 | 1. Ingesta y modelo base | Tener una tabla trazable. | Descarga con manifiesto y fact_award_item. | Contrato respetado, salida atómica y resumen. | Implementada y validada. |
 | 2. Calidad y EDA | Conocer cobertura, nulos, duplicados y sesgos. | Perfil de datos, reglas, tablas y gráficos base. | Hallazgos registrados antes de modelar. | En curso: perfil y fact_award validados; falta cerrar hallazgos en el notebook. |
-| 3. Representaciones | Crear objetos para algoritmos. | Features, matrices y grafos con diccionario. | Grano, filtros, semilla y validaciones definidos. | En curso: `fact_award_supplier` validada; faltan las interacciones altas. |
+| 3. Representaciones | Crear objetos para algoritmos. | Features, matrices y grafos con diccionario. | Grano, filtros, semilla y validaciones definidos. | Publicados y validados localmente; identidad canónica y linaje histórico completo siguen como límites. |
 | 4. Clustering | Descubrir tipologías. | KMeans++, jerárquico y/o HDBSCAN comparados. | Métricas, estabilidad e interpretación. | Pendiente. |
 | 5. Recomendación | Modelar interacción. | Vecindario, contenido y factores latentes. | Evaluación temporal/offline y límites explícitos. | Pendiente. |
 | 6. Enlaces y comunidades | Caracterizar la red. | PageRank, HITS y comunidades seleccionadas. | Grafo justificado y análisis de sensibilidad. | Pendiente. |
@@ -179,10 +185,10 @@ Cada fase termina con una salida, criterios de aceptación y una actualización 
 ### Orden operativo inmediato
 
 1. Ejecutar y completar 01_calidad_y_eda.ipynb usando los artefactos publicados.
-2. Publicar interacciones altas `entity_supplier_year` y `entity_category_year`, conservando moneda y exclusiones temporales.
-3. Definir una pregunta medible y un baseline por familia técnica antes de entrenar un modelo.
-4. Construir la representación mínima que responda cada pregunta.
-5. Evaluar, interpretar y solo entonces decidir si se agrega API o frontend.
+2. Medir con Spark la cobertura y contradicciones de `parties.identifier` y `additionalIdentifiers`; revisar candidatos de identidad y conservar los identificadores originales.
+3. Definir preguntas, construir vectores, matriz de interacción y grafo con Spark, y documentar particionado.
+4. Definir un baseline por familia técnica antes de entrenar un modelo.
+5. Evaluar e interpretar; preparar el reporte web interactivo exigido por el enunciado.
 
 ## 8. Estrategia de evaluación y rigor
 
@@ -215,11 +221,23 @@ Esta sección es acumulativa. Una decisión reemplazada se marca como **superada
 | D-013 | 2026-10-24 | Crear `fact_award` antes de calcular métricas monetarias. | Vigente | Una adjudicación se identifica por `process_ocid` + `award_id`; la transformación rechaza atributos conflictivos y evita repetir `award_amount` por ítem. |
 | D-014 | 2026-10-24 | Formular Fase 3 con tablas altas antes de matrices o grafos serializados. | Vigente | Las tablas Parquet normalizadas son auditables y reutilizables; matrices dispersas, índices y grafos se crearán solo para un experimento o modelo que los necesite. |
 | D-015 | 2026-10-24 | No asignar monto por proveedor cuando una adjudicación tenga varios proveedores. | Vigente | `award_amount_single_supplier` solo existe cuando hay un proveedor; evita sobrecontar o repartir dinero sin sustento. |
+| D-016 | 2026-10-25 | Excluir fechas ausentes de interacciones anuales y cuantificarlas; no sumar montos con moneda desconocida. | Vigente | Se preservan las filas en las tablas fuente, se informa cobertura y no se atribuye una unidad monetaria desconocida. |
+| D-017 | 2026-10-25 | Tratar nombres iguales con identificadores distintos como candidatos, no como fusiones automáticas. | Vigente | Se necesita evidencia verificable, revisión de contradicciones y trazabilidad antes de publicar una correspondencia canónica. |
+| D-018 | 2026-10-25 | Comparar identificadores OCDS por esquema y valor exactos, conservando el contexto del release. | Vigente | Las coincidencias y variantes son evidencia para investigar; no producen un mapeo de entidades automático. |
+| D-019 | 2026-10-25 | Mantener los ID originales mientras no exista evidencia suficiente para una correspondencia. | Vigente | Los nombres compartidos y las referencias sin `party` no permiten inferir equivalencias; los análisis deben declarar la limitación. |
+| D-020 | 2026-10-25 | Publicar matriz dispersa, vectores por entidad y KNN exacto con límite de pares. | Vigente | Se usan conteos sin mezclar montos y se registran ventana, escalado, diccionarios y huellas de entradas. |
 | E-001 | 2026-10-19 | Python 3.14 produjo incompatibilidad pandas/Meson. | Fallido, documentado | Usar .venv312 o Docker. |
 | E-002 | 2026-10-19 | pytest no encontraba scripts. | Resuelto | pyproject.toml incorpora la raíz al pythonpath. |
 | E-003 | 2026-10-23 | Spark Windows falló sin winutils.exe. | Resuelto | Script descarga y verifica helpers antes de Spark. |
 | E-004 | 2026-10-23 | Spark Windows falló con NativeIO Windows access0. | Resuelto | Se verifica hadoop.dll, su carga y MSVCR100.dll. |
 | E-005 | 2026-10-23 | Ruta Docker completa para 2023–2024. | Validada | Descarga, Parquet y _SUCCESS correctos. |
+| E-006 | 2026-10-25 | Diagnóstico exploratorio de identificadores y nombres sobre `fact_award_supplier`. | Validado localmente | Se observaron 2 858 nombres de proveedor con varios ID y 338 ID con varios nombres; son alertas, no duplicados confirmados. |
+| E-007 | 2026-10-25 | Extracción Spark de identificadores OCDS de 2023 y 2024. | Validada localmente | 32 de 128 340 referencias de proveedor no cruzaron con una `party`; no se hallaron grupos candidatos por esquema y valor exactos. Esto no descarta duplicados ni sustituye la revisión de nombres. |
+| E-008 | 2026-10-25 | Revisión de referencias sin cruce y de los diez nombres de proveedor con más ID. | Validada localmente | Las 32 referencias aparecen en adjudicaciones sin un `party.id` igual en su release; los diez nombres de la muestra empiezan por «consorcio» y reúnen 723 ID. No se infieren equivalencias. |
+| E-009 | 2026-10-25 | Lectura Spark de interacciones con metadatos JSON. | Resuelto | Spark intentó leer `_metadata.json` como Parquet; la lectura ahora filtra `*.parquet` conservando las particiones. |
+| E-010 | 2026-10-25 | Primera publicación de representaciones para adjudicaciones 2023–2024. | Validada localmente | 2 756 vectores, 61 939 pares de matriz y 13 780 aristas KNN; detalles y límites en README_ParteI.md. |
+| E-011 | 2026-10-25 | Huellas de entradas distintas entre Windows y Docker por orden de rutas. | Resuelto | Se ordenan explícitamente las rutas relativas como texto POSIX; ambas plataformas obtienen la misma huella para los mismos archivos. |
+| E-012 | 2026-10-25 | Interacciones, evidencia y representaciones en Docker sobre tablas existentes. | Validado | Totales de referencia conservados; la salida final coincide con el `run_id` y huellas de las interacciones regeneradas. La ruta completa desde descarga no se ejecutó en esta corrida. |
 
 El detalle técnico de E-003 y E-004 permanece en [ReporteSolucionHadoopWindows.md](ReporteSolucionHadoopWindows.md). Es un registro histórico; E-005 actualiza su pendiente de validación Docker.
 
@@ -235,7 +253,7 @@ El detalle técnico de E-003 y E-004 permanece en [ReporteSolucionHadoopWindows.
 
 ## 11. Situación actual
 
-**Actualizada el 2026-10-24.**
+**Actualizada el 2026-10-25.**
 
 El proyecto tiene una base de reproducción y una primera tabla analítica funcionales. Los archivos OCDS de 2023 y 2024 fueron verificados y el pipeline publicó data/processed/fact_award_item/_SUCCESS en Windows local y Docker. La corrida de referencia produjo:
 
@@ -247,10 +265,22 @@ El proyecto tiene una base de reproducción y una primera tabla analítica funci
 | Proveedores | 62 919 |
 | Entidades | 2 967 |
 
-Las pruebas actuales son 9 y pasan; ruff check . no reporta errores. La guía de réplica cubre Docker, Windows y Linux/macOS, con controles previos para los errores de Hadoop en Windows.
+La guía de réplica cubre Docker, Windows y Linux/macOS, con controles previos para los errores de Hadoop en Windows. La última validación local tuvo 26 pruebas aprobadas y Ruff sin errores. El estado concreto de la ejecución Docker de las etapas nuevas se informa en README_ParteI.md.
 
 La Fase 2 ya cuenta con un perfil inicial publicado para fact_award_item: 137 292 filas, 128 395 adjudicaciones con llave compuesta, cero duplicados exactos y cero repeticiones de la llave candidata. También se identificaron 35 fechas de adjudicación ausentes, 18 752 clasificaciones de ítem ausentes y múltiples monedas. `fact_award` se publicó con 128 395 filas y cero claves repetidas, por lo que es la base monetaria segura por moneda. El notebook 01_calidad_y_eda.ipynb es el espacio para interpretar y anotar estos hallazgos; los detalles técnicos permanecen en PlanFase2CalidadEDA.md.
 
-La Fase 3 tiene un diseño documentado en PlanFase3Representaciones.md. Su primera entrega, `fact_award_supplier`, fue publicada con 128 395 filas, cero claves repetidas y un proveedor por adjudicación en la corrida 2023–2024. Después se construirán tablas altas de interacción por entidad, proveedor, categoría, año analítico y moneda. No se crearán matrices densas, grafos ni modelos hasta validar estas bases. Falta cerrar las conclusiones narrativas del EDA y construir esas representaciones antes de modelar.
+La Fase 3 tiene un diseño documentado en PlanFase3Representaciones.md. `fact_award_supplier` contiene 128 395 filas y cero claves repetidas en la corrida 2023–2024. Se publicaron `entity_supplier_year` (108 924 grupos) y `entity_category_year` (21 744 grupos), con 128 360 interacciones elegibles cada una; 35 filas por fuente carecían de fecha. Las claves y sumas por moneda se reconciliaron localmente. Para adjudicaciones de 2023–2024 se publicaron 2 756 vectores, una matriz de 61 939 pares y un KNN de 13 780 aristas. La identidad canónica sigue sin confirmar.
 
-No existen todavía módulos de features, grafos, clustering, recomendación, comunidades, embeddings, API o frontend; se documentan como trabajo futuro, no como funcionalidad entregada.
+El notebook `02_diagnostico_resolucion_entidades.ipynb` identifica candidatos
+de revisión por nombre e identificador sin aplicar fusiones. La extracción
+`build_identity_evidence` publicó evidencia y cobertura para los archivos
+completos. La revisión encontró las 32 referencias sin cruce en adjudicaciones,
+sin un `party.id` igual en el mismo release. Los diez grupos por nombre más
+grandes de la muestra son consorcios y reúnen 723 ID con evidencia vinculada;
+esto no prueba equivalencias. Cero candidatos por identificador exacto no
+demuestra ausencia de duplicados. Los hashes originales se verifican, pero no
+se comprueba por hash el origen histórico de `fact_award_supplier`. Continuar
+declarando los límites de identidad y definir criterios y fuentes antes de
+proponer un mapeo canónico.
+
+No existen todavía clustering, recomendación, comunidades, embeddings, API o frontend; se documentan como trabajo futuro, no como funcionalidad entregada. El reporte web interactivo sí es obligatorio según el enunciado; su tecnología y necesidad de API se decidirán después.

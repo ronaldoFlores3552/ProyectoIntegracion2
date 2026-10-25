@@ -69,6 +69,73 @@ adjudicación, adjudicaciones sin proveedor y nombres no vacíos incompatibles
 para el mismo proveedor dentro de una adjudicación. No reparte montos entre
 proveedores sin una regla de negocio documentada.
 
+## Tablas de interacción anuales
+
+`entity_supplier_year` se construye desde `fact_award_supplier` al grano
+entidad × proveedor × año de adjudicación × moneda. `entity_category_year`
+se construye desde `fact_award` al grano entidad × categoría × año de
+adjudicación × moneda. Se publican en `data/processed/` y se particionan por
+`award_year`, derivado de `award_date` en la zona America/Lima.
+
+Ambas incluyen `award_count`, `amount_known_count`, `amount_sum` y
+`latest_award_date`. El monto de proveedor usa exclusivamente
+`award_amount_single_supplier`; el de categoría usa `award_amount`. Si faltan
+moneda o monto, la fila contribuye al conteo, pero no a `amount_sum`. Una suma
+sin ningún monto conocido es nula, no cero. `<MISSING>` representa una moneda
+o categoría ausente; el proceso rechaza ese literal si ya aparece en la fuente.
+
+Las filas sin fecha o entidad se excluyen de ambas tablas; las filas sin
+proveedor también se excluyen de la tabla de proveedores. `_metadata.json` en
+cada salida registra las exclusiones, cobertura de montos, recuentos y `run_id`.
+Las razones pueden solaparse; `excluded_rows` es el total de filas excluidas,
+no la suma de las razones. Las dos salidas comparten `run_id` cuando se generan
+en una misma ejecución; la publicación es atómica por tabla, no para el par.
+
+## Evidencia de identidad OCDS
+
+`data/processed/identity_evidence/` contiene un conjunto publicado como una
+unidad, con `_SUCCESS` y `_metadata.json`. La entrada es la fuente JSONL.GZ
+verificada frente al manifiesto y `fact_award_supplier` para los años elegidos.
+La referencia se identifica por año de archivo, proceso, release, rol y ID;
+el cruce exige coincidencia exacta de año, proceso, release y `party.id`.
+
+| Salida Parquet | Grano y propósito |
+|---|---|
+| `party_identifiers` | Identificador principal o adicional de una `party`, con posición, nombre, roles, esquema y valor originales. Incluye también valores incompletos. |
+| `reference_matches` | Una fila por referencia distinta; indica si coincide con cero, una o varias filas de `parties` en ese contexto. |
+| `reference_identifiers` | Evidencia de identificador vinculada a la referencia en el mismo contexto. |
+| `candidate_shared_identifiers` | Por rol, esquema y valor exactos: grupos asociados a más de un ID de referencia. |
+| `candidate_identifier_variants` | Por rol, ID de referencia y esquema: grupos con más de un valor de identificador. |
+
+Los grupos candidatos excluyen esquema o valor vacío y no normalizan ni
+fusionan identificadores. Sus coincidencias o contradicciones requieren
+revisión; las filas repetidas pueden reflejar distintas posiciones o releases.
+Los metadatos guardan los SHA-256 de las fuentes y la cobertura por rol. La
+verificación del manifiesto acredita los archivos actuales, pero no prueba por
+sí sola que la tabla `fact_award_supplier` se generó con esa misma versión.
+
+## Representaciones de la Parte I
+
+`data/processed/part1/` publica como unidad vectores, coordenadas dispersas,
+diccionarios y grafo KNN, con `_SUCCESS` y `_metadata.json`. Las entradas son
+las dos interacciones anuales publicadas con el mismo `run_id`; se registran
+huellas SHA-256 de sus contenidos actuales. Estas huellas no prueban el origen
+histórico de las interacciones ni de las tablas que las preceden.
+
+| Tabla | Grano y regla |
+|---|---|
+| `entity_features` | Una entidad en la ventana: conteo, logaritmo y proporciones por categoría; vectores original y estandarizado. El orden de categorías y el ajuste están en metadatos. |
+| `matrix` | Una entidad × proveedor: `interaction_count` es un conteo de adjudicaciones, suma de conteos entre años y monedas, no una suma de dinero. Incluye los índices de ambos diccionarios. |
+| `entity_dictionary`, `supplier_dictionary` | Un ID original y su índice entero base cero. Índices determinados por 256 buckets de hash Spark y orden dentro del bucket; usarlos solo con la matriz de la misma publicación. |
+| `graph_nodes` | Una entidad elegible, incluso si no tiene vecinos. |
+| `graph_edges` | Arista dirigida `src` → `dst` con distancia euclidiana estandarizada y posición entre vecinos. No hay autoaristas; empates se ordenan por ID. |
+
+La ventana usa `award_year`, no el año del archivo. El escalado de esta versión
+se ajusta sobre la ventana descriptiva completa: para una evaluación temporal
+futura debe reajustarse solo con entrenamiento. La publicación conserva ID
+originales y no afirma que no existan duplicados. El KNN exacto es cuadrático y
+se detiene antes de exceder `--max-pairs`.
+
 ## Campos principales
 
 | Grupo | Campos |
