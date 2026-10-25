@@ -1,5 +1,20 @@
 # Ejecución reproducible del proyecto
 
+## Parte III — preparación y evaluación retrospectiva
+
+Después de generar `fact_award_supplier` y ejecutar la auditoría del notebook 05, desde la raíz y con Python 3.12:
+
+```powershell
+python -m src.features.build_recommendation
+python -m src.models.recommendation_baseline
+python -m src.models.recommendation_neighbors
+python -m src.models.recommendation_als
+python -m src.models.recommendation_test
+python -m src.models.recommendation_content
+```
+
+Los comandos escriben cortes bajo `data/processed/recommendation` y resultados bajo `artifacts/recommendation_*`. Exigen `--overwrite` para regenerar una salida existente; regenerar también los resultados dependientes cuando cambie una entrada. La validación de 2023 selecciona ALS; la prueba de 2024 no debe usarse para modificar esa elección. El experimento de contenido se formuló después de observar la prueba de 2024 y solo evalúa validación 2023. Abrir los notebooks `05_auditoria_recomendacion.ipynb`, `06_recomendacion.ipynb` y `07_auditoria_contenido.ipynb` para auditoría e interpretación. Esta ruta se ejecutó localmente en Windows; el módulo de contenido también se verificó en Docker con las tablas existentes y produjo los mismos rankings. **La ruta completa desde las fuentes aún no se ha validado íntegramente en Docker.** La fecha de adjudicación no demuestra disponibilidad histórica.
+
 Todos los comandos se ejecutan desde la raíz del repositorio. Los datos y los
 artefactos se regeneran; no se incluyen en Git. La primera tabla, definida en
 [ContratoDatos.md](ContratoDatos.md), tiene el grano proceso × adjudicación ×

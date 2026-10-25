@@ -19,6 +19,12 @@ El diseño propuesto para clustering y anomalías está en
 [docs/PlanParteIIClustering.md](docs/PlanParteIIClustering.md). Los resultados
 actuales y pendientes están en [docs/README_ParteII.md](docs/README_ParteII.md).
 
+La pregunta, los cortes temporales y la evaluación propuesta para recomendación
+están en [docs/PlanParteIIIRecomendacion.md](docs/PlanParteIIIRecomendacion.md). La auditoría y el estado vigente están en [docs/README_ParteIII.md](docs/README_ParteIII.md).
+
+La revisión de ejemplos y del prototipo textual exploratorio se encuentra en
+[notebooks/07_auditoria_contenido.ipynb](notebooks/07_auditoria_contenido.ipynb).
+
 El control técnico de calidad y la ruta del análisis exploratorio están en
 [docs/PlanFase2CalidadEDA.md](docs/PlanFase2CalidadEDA.md). El análisis narrado
 se realiza en [notebooks/01_calidad_y_eda.ipynb](notebooks/01_calidad_y_eda.ipynb)

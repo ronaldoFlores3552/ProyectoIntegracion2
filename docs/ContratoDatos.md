@@ -149,6 +149,24 @@ se detiene antes de exceder `--max-pairs`.
 
 Las etiquetas son arbitrarias y las señales de distancia o ruido no prueban irregularidades. La selección HDBSCAN es sensible al entorno y a la abundancia de vectores idénticos; no constituye una clasificación definitiva.
 
+## Cortes retrospectivos de recomendación
+
+`data/processed/recommendation/` se publica como unidad con `_SUCCESS` y `_metadata.json`, a partir de `fact_award_supplier`. Se valida la clave adjudicación-proveedor y la coherencia entre fecha y año en America/Lima; se registran exclusiones y la huella de la entrada. Los cortes 2023 y 2024 usan, respectivamente, adjudicaciones anteriores al inicio de ese año para entrenamiento y adjudicaciones del año para etiquetas. La fuente actual no demuestra disponibilidad histórica.
+
+Cada carpeta de corte contiene:
+
+| Tabla | Grano y significado |
+|---|---|
+| `train` | Una entidad × proveedor presente antes del corte; `interaction_count`, `strength=log1p(interaction_count)` e índices de los diccionarios de ese corte. |
+| `entities`, `suppliers` | Un ID original conocido en entrenamiento y su índice entero estable para esa publicación. Los índices no se comparten entre cortes. |
+| `future_pairs` | Un par distinto observado en el año de evaluación, con indicadores `seen`, `entity_known`, `supplier_known` y `eligible_positive`. Un positivo elegible es nuevo y tiene ambos actores conocidos. |
+
+El catálogo candidato es el conjunto de proveedores de entrenamiento, excluyendo por entidad los proveedores de su `train`. No se publica una matriz densa de candidatos. El entrenamiento de 2023 se usa para selección; el de 2024 se usa para reentrenamiento y prueba final. Filtrar por fecha no prueba qué información estaba disponible entonces.
+
+Los artefactos regenerables `artifacts/recommendation_baseline`, `recommendation_neighbors`, `recommendation_als` y `recommendation_test` contienen `_SUCCESS`, `_metadata.json`, rankings por entidad y métricas por entidad a 10 y 20. La selección ALS registra ambas configuraciones de validación y la elegida; la prueba final registra la configuración y métricas de los tres métodos. No se serializan modelos. Todos los resultados se refieren a adjudicaciones observadas, no a preferencias ni a elegibilidad legal.
+
+`artifacts/recommendation_content/` contiene un experimento TF-IDF exploratorio para validación 2023. Se obtienen descripciones de `fact_award_item` mediante el cruce por proceso, adjudicación y proveedor con eventos elegibles anteriores al corte. Se verifica que los conteos de los eventos concilien con la matriz de entrenamiento. Los perfiles de entidad y proveedor se construyen únicamente con esos ítems y se comparan por coseno; los rankings excluyen relaciones previas. Los metadatos registran parámetros, huellas de cortes y entradas, cobertura y métricas. La ventana de prueba 2024 ya fue observada antes de formular este experimento y no constituye una prueba final independiente para él. Las huellas acreditan las entradas actuales, no las versiones históricas disponibles al corte.
+
 ## Campos principales
 
 | Grupo | Campos |

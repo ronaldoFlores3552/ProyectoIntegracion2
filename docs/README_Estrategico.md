@@ -14,6 +14,8 @@ El diseño propuesto para clustering, detección de anomalías y su reproducció
 está en [PlanParteIIClustering.md](PlanParteIIClustering.md); los resultados y
 pendientes actuales están en [README_ParteII.md](README_ParteII.md).
 
+La Parte III se diseñó en [PlanParteIIIRecomendacion.md](PlanParteIIIRecomendacion.md); la evaluación retrospectiva local y sus límites están en [README_ParteIII.md](README_ParteIII.md).
+
 Reglas de actualización:
 
 1. Actualizar la fecha superior y la sección **Situación actual** al cerrar una etapa o tomar una decisión relevante.
@@ -120,6 +122,7 @@ Proyecto2/
 │   ├── README_ParteI.md          # Resultados, metodología y relevo de la Parte I
 │   ├── README_ParteII.md         # Resultados y pendientes de clustering
 │   ├── PlanParteIIClustering.md  # Diseño y secuencia de la Parte II
+│   ├── PlanParteIIIRecomendacion.md # Pregunta, cortes y evaluación propuesta
 │   ├── ComandosEjecutarOrdenReplica.md
 │   ├── ContratoDatos.md
 │   ├── PlanFase2CalidadEDA.md
@@ -182,7 +185,7 @@ Cada fase termina con una salida, criterios de aceptación y una actualización 
 | 2. Calidad y EDA | Conocer cobertura, nulos, duplicados y sesgos. | Perfil de datos, reglas, tablas y gráficos base. | Hallazgos registrados antes de modelar. | En curso: perfil y fact_award validados; falta cerrar hallazgos en el notebook. |
 | 3. Representaciones | Crear objetos para algoritmos. | Features, matrices y grafos con diccionario. | Grano, filtros, semilla y validaciones definidos. | Publicados y validados localmente; identidad canónica y linaje histórico completo siguen como límites. |
 | 4. Clustering | Descubrir tipologías. | KMeans++, jerárquico y HDBSCAN comparados. | Métricas, estabilidad e interpretación. | Completada para la ventana descriptiva; límites y sensibilidad documentados. |
-| 5. Recomendación | Modelar interacción. | Vecindario, contenido y factores latentes. | Evaluación temporal/offline y límites explícitos. | Pendiente. |
+| 5. Recomendación | Modelar interacción. | Vecindario, contenido y factores latentes. | Evaluación temporal/offline y límites explícitos. | Evaluación retrospectiva local y contenido exploratorio completados para actores conocidos; arranque en frío pendiente. |
 | 6. Enlaces y comunidades | Caracterizar la red. | PageRank, HITS y comunidades seleccionadas. | Grafo justificado y análisis de sensibilidad. | Pendiente. |
 | 7. Representaciones de nodos | Probar embeddings útiles. | SVD, Node2Vec o alternativa justificada. | Comparación honesta con baseline. | Pendiente. |
 | 8. Síntesis y ética | Convertir resultados en evidencia. | Hallazgos, limitaciones y anexos. | Sin causalidad ni acusaciones sin sustento. | Pendiente. |
@@ -192,8 +195,8 @@ Cada fase termina con una salida, criterios de aceptación y una actualización 
 ### Orden operativo inmediato
 
 1. Reproducir el clustering publicado y revisar el notebook 04 junto con sus limitaciones.
-2. Formular la Parte III de recomendación: pregunta, señal implícita, corte temporal, candidatos y baselines.
-3. Diseñar al menos dos enfoques y su evaluación sin fuga temporal antes de implementarlos.
+2. Revisar resultados y límites de la Parte III, incluido el prototipo exploratorio por contenido y la independencia de la prueba.
+3. Diseñar y validar la preparación de entrenamiento, candidatos y positivos antes de implementar modelos.
 4. Integrar después los resultados de la Parte II en el reporte web exigido por el enunciado.
 5. Mantener como límites abiertos la identidad canónica y la trazabilidad histórica completa; evaluar su resolución antes de usos que la requieran.
 
@@ -247,6 +250,7 @@ Esta sección es acumulativa. Una decisión reemplazada se marca como **superada
 | E-012 | 2026-10-25 | Interacciones, evidencia y representaciones en Docker sobre tablas existentes. | Validado | Totales de referencia conservados; la salida final coincide con el `run_id` y huellas de las interacciones regeneradas. La ruta completa desde descarga no se ejecutó en esta corrida. |
 | E-013 | 2026-10-25 | Primera evaluación descriptiva KMeans++ y HDBSCAN en entidades 2023–2024. | Validada en Windows y Docker; provisional | k=4 y silueta 0,359; HDBSCAN 15/5 produjo 46 grupos y 48,9 % de ruido en Windows, 48,7 % en Docker. Los vectores repetidos y el peso de categorías exigen cautela. |
 | E-014 | 2026-10-25 | Cierre descriptivo de la Parte II con Ward en muestra y sensibilidad de HDBSCAN. | Completada con límites | ARI Ward/KMeans 0,483 en 400 entidades; HDBSCAN varía con remuestreos y no se adopta como tipología definitiva. |
+| E-015 | 2026-10-25 | Formulación de la Parte III: pares nuevos con proveedores conocidos, validación 2023 y prueba 2024, popularidad, vecindario y ALS implícito. | Planificado | Evaluación retrospectiva, no disponibilidad histórica probada; auditoría temporal, cobertura y modelos pendientes. |
 
 El detalle técnico de E-003 y E-004 permanece en [ReporteSolucionHadoopWindows.md](ReporteSolucionHadoopWindows.md). Es un registro histórico; E-005 actualiza su pendiente de validación Docker.
 
@@ -294,9 +298,28 @@ proponer un mapeo canónico.
 
 KMeans++, HDBSCAN y el jerárquico con dendrograma están analizados en
 [README_ParteII.md](README_ParteII.md). La Parte II está completa para el
-alcance descriptivo, con limitaciones documentadas. Recomendación,
+alcance descriptivo, con limitaciones documentadas. La recomendación retrospectiva está evaluada localmente;
 comunidades, embeddings, API y frontend siguen pendientes; el reporte web
 interactivo es obligatorio según el enunciado.
 
-El siguiente trabajo propuesto es plantear la Parte III de recomendación,
-con una evaluación temporal y al menos dos enfoques según el enunciado.
+La Parte III tiene un [plan](PlanParteIIIRecomendacion.md) y resultados retrospectivos en [README_ParteIII.md](README_ParteIII.md). La disponibilidad histórica y los casos fríos siguen abiertos.
+
+
+### Avance Parte III — auditoría temporal (25 de octubre de 2026)
+
+Se ejecutó [notebook 05](../notebooks/05_auditoria_recomendacion.ipynb) sobre las tablas locales y se registró la evidencia en [README_ParteIII.md](README_ParteIII.md). Las claves y las interacciones anuales concilian y se reprodujeron los conteos preliminares. Las fechas de ambos campos para todo el entrenamiento del corte 2023 son posteriores o iguales al corte; en 2024 ocurre en 51 473 de 88 395 filas. Las fechas por sí solas no reconstruyen la disponibilidad histórica. Se mantienen las ventanas exclusivamente para un análisis retrospectivo, sujeto a cobertura e identidad; no se ha entrenado ningún modelo. Siguiente fase: preparar y verificar candidatos y positivos con entrenamiento separado por corte.
+
+
+### Avance Parte III — evaluación retrospectiva (25 de octubre de 2026)
+
+Tras comprobar la auditoría, se prepararon cortes con Spark y se contrastaron sus conteos. Se ejecutaron popularidad, vecindario por bloques y ALS, seleccionando ALS en 2023 y comparando una prueba retrospectiva en 2024. ALS logró NDCG@10 0,0657 frente a 0,0554 de vecindario y 0,0252 de popularidad en 1 879 entidades evaluables; véanse cobertura, segmentos y límites en [README_ParteIII.md](README_ParteIII.md). No se ha verificado disponibilidad histórica, ni se han evaluado arranque en frío o recomendaciones basadas en contenido.
+
+
+### Avance Parte III — contenido exploratorio (25 de octubre de 2026)
+
+Se auditó la cobertura y se revisaron casos en [notebook 07](../notebooks/07_auditoria_contenido.ipynb). TF-IDF de descripciones de ítems, construido solo con eventos anteriores al corte, obtuvo NDCG@10 0,0098 y cobertura de proveedores 44,21 % en validación 2023; popularidad obtuvo 0,0217 y ALS 0,0558. La configuración no se adopta como modelo principal. La prueba de 2024 ya fue observada antes de formular el experimento y no sería independiente; los resultados y límites están en [README_ParteIII.md](README_ParteIII.md). La reproducción integral Docker sigue pendiente por daemon no disponible.
+
+
+### Verificación tras error de arranque de Docker (25 de octubre de 2026)
+
+Docker Desktop presentó un error relacionado con `sailor-ingest.sock` después de intentar iniciarlo; posteriormente el motor volvió a responder sin modificar ese archivo. Se conciliaron huellas y métricas de los cinco experimentos de recomendación y pasaron 38 pruebas locales. El módulo de contenido se ejecutó en Docker con las entradas existentes y una salida separada; sus 36 836 recomendaciones y métricas coincidieron con Windows. La reproducción completa desde la fuente y de todos los modelos en Docker sigue pendiente.
