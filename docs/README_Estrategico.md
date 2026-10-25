@@ -10,6 +10,10 @@ Este documento es el mapa de trabajo del Proyecto Integrador 2. Explica el probl
 
 Para el estado vigente de la Parte I, consultar [README_ParteI.md](README_ParteI.md). El [plan anterior](ReporteYPlanCierreParte1.md) se conserva como historial.
 
+El diseño propuesto para clustering, detección de anomalías y su reproducción
+está en [PlanParteIIClustering.md](PlanParteIIClustering.md); los resultados y
+pendientes actuales están en [README_ParteII.md](README_ParteII.md).
+
 Reglas de actualización:
 
 1. Actualizar la fecha superior y la sección **Situación actual** al cerrar una etapa o tomar una decisión relevante.
@@ -114,6 +118,8 @@ Proyecto2/
 ├── docs/
 │   ├── README_Estrategico.md     # Este mapa, decisiones y estado
 │   ├── README_ParteI.md          # Resultados, metodología y relevo de la Parte I
+│   ├── README_ParteII.md         # Resultados y pendientes de clustering
+│   ├── PlanParteIIClustering.md  # Diseño y secuencia de la Parte II
 │   ├── ComandosEjecutarOrdenReplica.md
 │   ├── ContratoDatos.md
 │   ├── PlanFase2CalidadEDA.md
@@ -128,14 +134,15 @@ Proyecto2/
 │   ├── quality/                  # Perfil técnico y reglas de calidad publicadas
 │   ├── features/                 # Interacciones, vectores, matriz y KNN en Spark
 │   ├── graphs/                   # Planificado: grafos y métricas
-│   ├── models/                   # Planificado: modelos y embeddings
+│   ├── models/                   # Clustering descriptivo y artefactos reproducibles
 │   ├── evaluation/               # Planificado: métricas y baselines
 │   └── serving/                  # Planificado: carga para API
 ├── tests/                        # Pruebas unitarias e integración acotada
 ├── notebooks/                    # Exploración narrada y gráficos reproducibles
 │   ├── 01_calidad_y_eda.ipynb
 │   ├── 02_diagnostico_resolucion_entidades.ipynb
-│   └── 03_particionamiento_spark.ipynb
+│   ├── 03_particionamiento_spark.ipynb
+│   └── 04_clustering_y_anomalias.ipynb
 ├── api/                          # Planificado: FastAPI
 ├── frontend/                     # Planificado: React
 ├── Dockerfile
@@ -174,7 +181,7 @@ Cada fase termina con una salida, criterios de aceptación y una actualización 
 | 1. Ingesta y modelo base | Tener una tabla trazable. | Descarga con manifiesto y fact_award_item. | Contrato respetado, salida atómica y resumen. | Implementada y validada. |
 | 2. Calidad y EDA | Conocer cobertura, nulos, duplicados y sesgos. | Perfil de datos, reglas, tablas y gráficos base. | Hallazgos registrados antes de modelar. | En curso: perfil y fact_award validados; falta cerrar hallazgos en el notebook. |
 | 3. Representaciones | Crear objetos para algoritmos. | Features, matrices y grafos con diccionario. | Grano, filtros, semilla y validaciones definidos. | Publicados y validados localmente; identidad canónica y linaje histórico completo siguen como límites. |
-| 4. Clustering | Descubrir tipologías. | KMeans++, jerárquico y/o HDBSCAN comparados. | Métricas, estabilidad e interpretación. | Pendiente. |
+| 4. Clustering | Descubrir tipologías. | KMeans++, jerárquico y HDBSCAN comparados. | Métricas, estabilidad e interpretación. | Completada para la ventana descriptiva; límites y sensibilidad documentados. |
 | 5. Recomendación | Modelar interacción. | Vecindario, contenido y factores latentes. | Evaluación temporal/offline y límites explícitos. | Pendiente. |
 | 6. Enlaces y comunidades | Caracterizar la red. | PageRank, HITS y comunidades seleccionadas. | Grafo justificado y análisis de sensibilidad. | Pendiente. |
 | 7. Representaciones de nodos | Probar embeddings útiles. | SVD, Node2Vec o alternativa justificada. | Comparación honesta con baseline. | Pendiente. |
@@ -184,11 +191,11 @@ Cada fase termina con una salida, criterios de aceptación y una actualización 
 
 ### Orden operativo inmediato
 
-1. Ejecutar y completar 01_calidad_y_eda.ipynb usando los artefactos publicados.
-2. Medir con Spark la cobertura y contradicciones de `parties.identifier` y `additionalIdentifiers`; revisar candidatos de identidad y conservar los identificadores originales.
-3. Definir preguntas, construir vectores, matriz de interacción y grafo con Spark, y documentar particionado.
-4. Definir un baseline por familia técnica antes de entrenar un modelo.
-5. Evaluar e interpretar; preparar el reporte web interactivo exigido por el enunciado.
+1. Reproducir el clustering publicado y revisar el notebook 04 junto con sus limitaciones.
+2. Formular la Parte III de recomendación: pregunta, señal implícita, corte temporal, candidatos y baselines.
+3. Diseñar al menos dos enfoques y su evaluación sin fuga temporal antes de implementarlos.
+4. Integrar después los resultados de la Parte II en el reporte web exigido por el enunciado.
+5. Mantener como límites abiertos la identidad canónica y la trazabilidad histórica completa; evaluar su resolución antes de usos que la requieran.
 
 ## 8. Estrategia de evaluación y rigor
 
@@ -238,6 +245,8 @@ Esta sección es acumulativa. Una decisión reemplazada se marca como **superada
 | E-010 | 2026-10-25 | Primera publicación de representaciones para adjudicaciones 2023–2024. | Validada localmente | 2 756 vectores, 61 939 pares de matriz y 13 780 aristas KNN; detalles y límites en README_ParteI.md. |
 | E-011 | 2026-10-25 | Huellas de entradas distintas entre Windows y Docker por orden de rutas. | Resuelto | Se ordenan explícitamente las rutas relativas como texto POSIX; ambas plataformas obtienen la misma huella para los mismos archivos. |
 | E-012 | 2026-10-25 | Interacciones, evidencia y representaciones en Docker sobre tablas existentes. | Validado | Totales de referencia conservados; la salida final coincide con el `run_id` y huellas de las interacciones regeneradas. La ruta completa desde descarga no se ejecutó en esta corrida. |
+| E-013 | 2026-10-25 | Primera evaluación descriptiva KMeans++ y HDBSCAN en entidades 2023–2024. | Validada en Windows y Docker; provisional | k=4 y silueta 0,359; HDBSCAN 15/5 produjo 46 grupos y 48,9 % de ruido en Windows, 48,7 % en Docker. Los vectores repetidos y el peso de categorías exigen cautela. |
+| E-014 | 2026-10-25 | Cierre descriptivo de la Parte II con Ward en muestra y sensibilidad de HDBSCAN. | Completada con límites | ARI Ward/KMeans 0,483 en 400 entidades; HDBSCAN varía con remuestreos y no se adopta como tipología definitiva. |
 
 El detalle técnico de E-003 y E-004 permanece en [ReporteSolucionHadoopWindows.md](ReporteSolucionHadoopWindows.md). Es un registro histórico; E-005 actualiza su pendiente de validación Docker.
 
@@ -265,7 +274,7 @@ El proyecto tiene una base de reproducción y una primera tabla analítica funci
 | Proveedores | 62 919 |
 | Entidades | 2 967 |
 
-La guía de réplica cubre Docker, Windows y Linux/macOS, con controles previos para los errores de Hadoop en Windows. La última validación local tuvo 26 pruebas aprobadas y Ruff sin errores. El estado concreto de la ejecución Docker de las etapas nuevas se informa en README_ParteI.md.
+La guía de réplica cubre Docker, Windows y Linux/macOS, con controles previos para los errores de Hadoop en Windows. La última validación local tuvo 30 pruebas aprobadas y Ruff sin errores. La primera ejecución de clustering se comprobó en Windows y Docker; los resultados y su variación están en README_ParteII.md.
 
 La Fase 2 ya cuenta con un perfil inicial publicado para fact_award_item: 137 292 filas, 128 395 adjudicaciones con llave compuesta, cero duplicados exactos y cero repeticiones de la llave candidata. También se identificaron 35 fechas de adjudicación ausentes, 18 752 clasificaciones de ítem ausentes y múltiples monedas. `fact_award` se publicó con 128 395 filas y cero claves repetidas, por lo que es la base monetaria segura por moneda. El notebook 01_calidad_y_eda.ipynb es el espacio para interpretar y anotar estos hallazgos; los detalles técnicos permanecen en PlanFase2CalidadEDA.md.
 
@@ -283,4 +292,11 @@ se comprueba por hash el origen histórico de `fact_award_supplier`. Continuar
 declarando los límites de identidad y definir criterios y fuentes antes de
 proponer un mapeo canónico.
 
-No existen todavía clustering, recomendación, comunidades, embeddings, API o frontend; se documentan como trabajo futuro, no como funcionalidad entregada. El reporte web interactivo sí es obligatorio según el enunciado; su tecnología y necesidad de API se decidirán después.
+KMeans++, HDBSCAN y el jerárquico con dendrograma están analizados en
+[README_ParteII.md](README_ParteII.md). La Parte II está completa para el
+alcance descriptivo, con limitaciones documentadas. Recomendación,
+comunidades, embeddings, API y frontend siguen pendientes; el reporte web
+interactivo es obligatorio según el enunciado.
+
+El siguiente trabajo propuesto es plantear la Parte III de recomendación,
+con una evaluación temporal y al menos dos enfoques según el enunciado.

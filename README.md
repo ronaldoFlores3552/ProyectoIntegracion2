@@ -15,6 +15,10 @@ bitácora de relevo están en
 La metodología, resultados, límites y estado de la Parte I están en
 [docs/README_ParteI.md](docs/README_ParteI.md).
 
+El diseño propuesto para clustering y anomalías está en
+[docs/PlanParteIIClustering.md](docs/PlanParteIIClustering.md). Los resultados
+actuales y pendientes están en [docs/README_ParteII.md](docs/README_ParteII.md).
+
 El control técnico de calidad y la ruta del análisis exploratorio están en
 [docs/PlanFase2CalidadEDA.md](docs/PlanFase2CalidadEDA.md). El análisis narrado
 se realiza en [notebooks/01_calidad_y_eda.ipynb](notebooks/01_calidad_y_eda.ipynb)

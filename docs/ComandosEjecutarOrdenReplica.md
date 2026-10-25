@@ -125,6 +125,12 @@ comandos de Python locales.
 
     Punto de control: aparece `Parte I publicada:` y termina con código 0.
 
+    ~~~bash
+    docker compose run --rm pipeline python -m src.models.build_clustering --overwrite
+    ~~~
+
+    Punto de control: aparece `Clustering publicado:` y termina con código 0.
+
 11. Compruebe las publicaciones completas.
 
    ~~~bash
@@ -171,6 +177,12 @@ comandos de Python locales.
 
    ~~~bash
    docker compose run --rm pipeline test -f data/processed/part1/_SUCCESS
+   ~~~
+
+   Punto de control: termina con código 0 y no imprime errores.
+
+   ~~~bash
+   docker compose run --rm pipeline test -f artifacts/clustering/_SUCCESS
    ~~~
 
    Punto de control: termina con código 0 y no imprime errores.
@@ -350,6 +362,12 @@ indique un error.
 
     Punto de control: aparece `Parte I publicada:` y termina con código 0.
 
+    ~~~powershell
+    python -m src.models.build_clustering --overwrite
+    ~~~
+
+    Punto de control: aparece `Clustering publicado:` y termina con código 0.
+
 18. Verifique que las publicaciones terminaron completamente.
 
     ~~~powershell
@@ -397,6 +415,12 @@ indique un error.
 
     ~~~powershell
     Test-Path data\processed\part1\_SUCCESS
+    ~~~
+
+    Punto de control: debe devolver `True`.
+
+    ~~~powershell
+    Test-Path artifacts\clustering\_SUCCESS
     ~~~
 
     Punto de control: debe devolver `True`.
@@ -542,6 +566,12 @@ Java 17; no usa los helpers de Windows.
 
     Punto de control: aparece `Parte I publicada:` y termina con código 0.
 
+    ~~~bash
+    python -m src.models.build_clustering --overwrite
+    ~~~
+
+    Punto de control: aparece `Clustering publicado:` y termina con código 0.
+
 17. Compruebe las publicaciones completas.
 
     ~~~bash
@@ -588,6 +618,12 @@ Java 17; no usa los helpers de Windows.
 
     ~~~bash
     test -f data/processed/part1/_SUCCESS
+    ~~~
+
+    Punto de control: termina con código 0.
+
+    ~~~bash
+    test -f artifacts/clustering/_SUCCESS
     ~~~
 
     Punto de control: termina con código 0.
@@ -690,10 +726,12 @@ No modifique manualmente los archivos descargados. El manifiesto conserva la pro
 | `build_interactions` | Disponible | Publica interacciones anuales por proveedor y categoría y sus metadatos |
 | `build_identity_evidence` | Disponible | Extrae evidencia OCDS y candidatos de identidad sin fusionar ID |
 | `build_part1` | Disponible | Publica vectores, matriz dispersa y grafo KNN con Spark |
+| `build_clustering` | Disponible | Evalúa KMeans++ y HDBSCAN y publica métricas y asignaciones |
 | `profile_fact_award_item` | Disponible | Publica el control técnico de calidad para el notebook de EDA |
 | `01_calidad_y_eda.ipynb` | Disponible | Explora y documenta hallazgos sin alterar tablas oficiales |
 | `02_diagnostico_resolucion_entidades.ipynb` | Disponible | Examina candidatos de identidad sin modificar identificadores |
 | `03_particionamiento_spark.ipynb` | Disponible | Analiza filtros, plan Spark y configuraciones de shuffle |
+| `04_clustering_y_anomalias.ipynb` | Disponible | Examina perfiles, Ward y dendrograma, sensibilidad y candidatos sin modificar la fuente |
 | Resto del pipeline Spark | Pendiente | Se añadirá en la siguiente fase |
 | API y frontend | Pendiente | Se añadirán cuando existan artefactos |
 

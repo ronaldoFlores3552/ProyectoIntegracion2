@@ -136,6 +136,19 @@ futura debe reajustarse solo con entrenamiento. La publicación conserva ID
 originales y no afirma que no existan duplicados. El KNN exacto es cuadrático y
 se detiene antes de exceder `--max-pairs`.
 
+## Clustering descriptivo de entidades
+
+`artifacts/clustering/` es regenerable y contiene una publicación completa cuando existe `_SUCCESS`. Se deriva de `data/processed/part1/entity_features` para la ventana 2023–2024; `_metadata.json` registra las huellas de las entradas, versiones, escala, criterios y selecciones. Una ejecución nueva se publica por staging y exige `--overwrite` cuando ya existe una salida.
+
+| Archivo | Grano y significado |
+|---|---|
+| `features.parquet` | Una fila por `entity_id`; conteo de adjudicaciones, `log1p` y tres proporciones de categorías. |
+| `assignments.parquet` | Una entidad × método × variante de escalado × configuración. `selected` marca las configuraciones elegidas provisionalmente; `label=-1` representa ruido de HDBSCAN. `distance` corresponde a KMeans y `probability` a HDBSCAN. `outlier_candidate` solo se marca en la configuración seleccionada, según las reglas del reporte. |
+| `kmeans_metrics.parquet`, `hdbscan_metrics.parquet` | Una fila por variante y configuración; la silueta de HDBSCAN excluye el ruido. |
+| `profiles.parquet` | Un método seleccionado × etiqueta, incluido el ruido cuando existe; incluye tamaño y medianas descriptivas. |
+
+Las etiquetas son arbitrarias y las señales de distancia o ruido no prueban irregularidades. La selección HDBSCAN es sensible al entorno y a la abundancia de vectores idénticos; no constituye una clasificación definitiva.
+
 ## Campos principales
 
 | Grupo | Campos |
