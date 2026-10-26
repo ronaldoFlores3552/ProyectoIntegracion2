@@ -13,7 +13,7 @@ python -m src.models.recommendation_test
 python -m src.models.recommendation_content
 ```
 
-Los comandos escriben cortes bajo `data/processed/recommendation` y resultados bajo `artifacts/recommendation_*`. Exigen `--overwrite` para regenerar una salida existente; regenerar también los resultados dependientes cuando cambie una entrada. La validación de 2023 selecciona ALS; la prueba de 2024 no debe usarse para modificar esa elección. El experimento de contenido se formuló después de observar la prueba de 2024 y solo evalúa validación 2023. Abrir los notebooks `05_auditoria_recomendacion.ipynb`, `06_recomendacion.ipynb` y `07_auditoria_contenido.ipynb` para auditoría e interpretación. Esta ruta se ejecutó localmente en Windows; el módulo de contenido también se verificó en Docker con las tablas existentes y produjo los mismos rankings. **La ruta completa desde las fuentes aún no se ha validado íntegramente en Docker.** La fecha de adjudicación no demuestra disponibilidad histórica.
+Los comandos escriben cortes bajo `data/processed/recommendation` y resultados bajo `artifacts/recommendation_*`. Exigen `--overwrite` para regenerar una salida existente; regenerar también los resultados dependientes cuando cambie una entrada. La validación de 2023 selecciona ALS; la prueba de 2024 no debe usarse para modificar esa elección. El experimento de contenido se formuló después de observar la prueba de 2024 y solo evalúa validación 2023. Abrir los notebooks `05_auditoria_recomendacion.ipynb`, `06_recomendacion.ipynb` y `07_auditoria_contenido.ipynb` para auditoría e interpretación. La cadena directa de recomendación desde los raw 2023–2024 se replicó con la imagen Docker corregida y resultados aislados; tablas, cortes, rankings y métricas coincidieron con la referencia dentro de una tolerancia numérica de 1e-12. Esta comprobación no incluye todas las etapas de las Partes I y II ni otra máquina. La fecha de adjudicación no demuestra disponibilidad histórica.
 
 Todos los comandos se ejecutan desde la raíz del repositorio. Los datos y los
 artefactos se regeneran; no se incluyen en Git. La primera tabla, definida en
@@ -41,6 +41,37 @@ la ruta de Docker.
 PySpark 3.5.6 incluye Hadoop 3.3.4. En Windows, los helpers 3.3.5 usados por el
 proyecto están verificados como compatibles. Linux, macOS y Docker no necesitan
 `winutils.exe` ni `hadoop.dll`.
+
+## Réplica aislada de la cadena de la Parte III en Docker
+
+Desde la raíz del proyecto, con Docker disponible y los raw 2023–2024 descargados, ejecute en PowerShell. El directorio de salida debe ser nuevo; los comandos no sobrescriben resultados anteriores. Reconstruir la imagen instala la dependencia necesaria para PySpark ML.
+
+```powershell
+docker compose build pipeline
+$manifest = Get-Content data/raw/manifest.json -Raw | ConvertFrom-Json
+foreach ($entry in $manifest.downloads) {
+    $file = Join-Path data/raw $entry.filename
+    if ((Get-Item $file).Length -ne $entry.size_bytes -or
+        (Get-FileHash $file -Algorithm SHA256).Hash.ToLower() -ne $entry.sha256) {
+        throw "El archivo $file no coincide con el manifiesto"
+    }
+}
+$root = 'artifacts/replica_parte3'
+$processed = "$root/processed"
+$models = "$root/models"
+docker compose run --rm --no-deps pipeline python scripts/validate_environment.py
+docker compose run --rm --no-deps pipeline python -m src.processing.build_fact_award_item --input-dir data/raw --output-dir "$processed/fact_award_item" --years 2023 2024 --master 'local[4]'
+docker compose run --rm --no-deps pipeline python -m src.processing.build_fact_award --input-dir "$processed/fact_award_item" --output-dir "$processed/fact_award" --master 'local[4]'
+docker compose run --rm --no-deps pipeline python -m src.processing.build_fact_award_supplier --award-items-dir "$processed/fact_award_item" --awards-dir "$processed/fact_award" --output-dir "$processed/fact_award_supplier" --master 'local[4]'
+docker compose run --rm --no-deps pipeline python -m src.features.build_recommendation --input-dir "$processed/fact_award_supplier" --output-dir "$processed/recommendation" --master 'local[4]'
+docker compose run --rm --no-deps pipeline python -m src.models.recommendation_baseline --input-dir "$processed/recommendation" --events-dir "$processed/fact_award_supplier" --output-dir "$models/baseline"
+docker compose run --rm --no-deps pipeline python -m src.models.recommendation_neighbors --input-dir "$processed/recommendation" --events-dir "$processed/fact_award_supplier" --baseline-dir "$models/baseline" --output-dir "$models/neighbors"
+docker compose run --rm --no-deps pipeline python -m src.models.recommendation_als --input-dir "$processed/recommendation" --events-dir "$processed/fact_award_supplier" --baseline-dir "$models/baseline" --output-dir "$models/als" --master 'local[4]'
+docker compose run --rm --no-deps pipeline python -m src.models.recommendation_test --input-dir "$processed/recommendation" --events-dir "$processed/fact_award_supplier" --baseline-dir "$models/baseline" --neighbors-dir "$models/neighbors" --als-dir "$models/als" --output-dir "$models/test" --master 'local[4]'
+docker compose run --rm --no-deps pipeline python -m src.models.recommendation_content --input-dir "$processed/recommendation" --events-dir "$processed/fact_award_supplier" --items-dir "$processed/fact_award_item" --baseline-dir "$models/baseline" --output-dir "$models/content"
+```
+
+Compruebe que cada comando termina con código 0 y publica `_SUCCESS` antes de continuar; si falla una etapa, corrija la causa y reanude desde ella. La réplica usa los archivos presentes, no demuestra que fueran conocidos antes de los cortes. Los modelos y tablas se comparan por contenido y métricas, no por huellas de archivos Parquet entre ejecuciones diferentes.
 
 ## 1. Ruta A — Docker (recomendada)
 

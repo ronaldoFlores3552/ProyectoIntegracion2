@@ -185,7 +185,7 @@ Cada fase termina con una salida, criterios de aceptación y una actualización 
 | 2. Calidad y EDA | Conocer cobertura, nulos, duplicados y sesgos. | Perfil de datos, reglas, tablas y gráficos base. | Hallazgos registrados antes de modelar. | En curso: perfil y fact_award validados; falta cerrar hallazgos en el notebook. |
 | 3. Representaciones | Crear objetos para algoritmos. | Features, matrices y grafos con diccionario. | Grano, filtros, semilla y validaciones definidos. | Publicados y validados localmente; identidad canónica y linaje histórico completo siguen como límites. |
 | 4. Clustering | Descubrir tipologías. | KMeans++, jerárquico y HDBSCAN comparados. | Métricas, estabilidad e interpretación. | Completada para la ventana descriptiva; límites y sensibilidad documentados. |
-| 5. Recomendación | Modelar interacción. | Vecindario, contenido y factores latentes. | Evaluación temporal/offline y límites explícitos. | Evaluación retrospectiva local y contenido exploratorio completados para actores conocidos; arranque en frío pendiente. |
+| 5. Recomendación | Modelar interacción. | Vecindario, contenido y factores latentes. | Evaluación temporal/offline y límites explícitos. | Análisis retrospectivo y réplica Docker de la cadena directa completados para actores conocidos; arranque en frío y disponibilidad histórica pendientes. |
 | 6. Enlaces y comunidades | Caracterizar la red. | PageRank, HITS y comunidades seleccionadas. | Grafo justificado y análisis de sensibilidad. | Pendiente. |
 | 7. Representaciones de nodos | Probar embeddings útiles. | SVD, Node2Vec o alternativa justificada. | Comparación honesta con baseline. | Pendiente. |
 | 8. Síntesis y ética | Convertir resultados en evidencia. | Hallazgos, limitaciones y anexos. | Sin causalidad ni acusaciones sin sustento. | Pendiente. |
@@ -323,3 +323,10 @@ Se auditó la cobertura y se revisaron casos en [notebook 07](../notebooks/07_au
 ### Verificación tras error de arranque de Docker (25 de octubre de 2026)
 
 Docker Desktop presentó un error relacionado con `sailor-ingest.sock` después de intentar iniciarlo; posteriormente el motor volvió a responder sin modificar ese archivo. Se conciliaron huellas y métricas de los cinco experimentos de recomendación y pasaron 38 pruebas locales. El módulo de contenido se ejecutó en Docker con las entradas existentes y una salida separada; sus 36 836 recomendaciones y métricas coincidieron con Windows. La reproducción completa desde la fuente y de todos los modelos en Docker sigue pendiente.
+
+
+### Cierre analítico y réplica de la Parte III (25 de octubre de 2026)
+
+Se verificó la cadena directa desde los raw 2023–2024 hasta los modelos de recomendación con una misma imagen Docker corregida, en salidas aisladas. Las tablas, cortes, rankings, métricas y diagnósticos coincidieron con la referencia, dentro de tolerancia numérica 1e-12. ALS seleccionó 16 factores; las conclusiones, cobertura y límites están en [README_ParteIII.md](README_ParteIII.md). Se fijó `setuptools` en las dependencias y se añadió la importación de ALS al control de entorno. La primera llamada a la etapa de proveedores tuvo un argumento incorrecto y se retomó con la misma imagen después de corregirlo. Tras la réplica se verificaron nuevamente los raw, pasaron 38 pruebas y Ruff no reportó errores. No se afirma reproducibilidad en otra máquina ni disponibilidad histórica de los registros.
+
+El análisis de la Parte III queda concluido para actores conocidos y como evaluación retrospectiva. Continúan como limitaciones la identidad, la disponibilidad histórica y el arranque en frío; la mención de híbrido o ANN en la rúbrica merece confirmación. La web y las Partes IV–VII quedan fuera de este cierre.

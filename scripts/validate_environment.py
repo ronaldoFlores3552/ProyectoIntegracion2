@@ -11,7 +11,15 @@ from importlib.metadata import PackageNotFoundError, version
 
 from setup_windows_hadoop import helper_home, verify_helpers
 
-REQUIRED_PACKAGES = ("pyspark", "pandas", "numpy", "pyarrow", "scikit-learn", "networkx")
+REQUIRED_PACKAGES = (
+    "pyspark",
+    "setuptools",
+    "pandas",
+    "numpy",
+    "pyarrow",
+    "scikit-learn",
+    "networkx",
+)
 
 
 def main() -> int:
@@ -43,6 +51,13 @@ def main() -> int:
         print(f"ERROR: faltan paquetes: {', '.join(missing)}", file=sys.stderr)
         return 1
 
+    try:
+        from pyspark.ml.recommendation import ALS  # noqa: F401
+    except ImportError as exc:
+        print(f"ERROR: PySpark ML no se puede importar: {exc}", file=sys.stderr)
+        return 1
+    print("PySpark ML ALS: importación correcta")
+
     if os.name == "nt":
         problems = verify_helpers()
         if problems:
@@ -57,4 +72,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
