@@ -1,7 +1,7 @@
 # Replanteamiento de las preguntas de interés y de los objetos analíticos
 
 **Fecha:** 2026-11-10
-**Estado:** propuesta para discusión del equipo (versión 5: medición de participantes, P1 reescrita y tres rondas de revisión con Codex). No modifica código ni artefactos publicados.
+**Estado:** propuesta para discusión del equipo (versión 5: medición de participantes, P1 reescrita y tres rondas de revisión). No modifica código ni artefactos publicados.
 
 ## 1. Qué pide el enunciado
 
@@ -43,7 +43,7 @@ Se extrajeron identificadores y se revisaron candidatos (2 858 nombres con vario
 
 ### 2.5 La fuente trae más de lo que se extrajo (medido el 2026-11-10)
 
-Medición sobre los mismos archivos que usó la Parte I (SHA-256 idénticos a README_ParteI), ventana de adjudicación 2023-2024, con `scripts/exploracion/medir_participantes.py` y `medir_participantes_extra.py`; Codex re-ejecutó y reprodujo las cifras principales. Coinciden los 2 756 compradores y 39 819 proveedores de la Parte I. Hay 83 648 adjudicaciones frente a 81 724: las 1 924 adicionales no tienen proveedor y `build_fact_award_item.py:160` las descarta.
+Medición sobre los mismos archivos que usó la Parte I (SHA-256 idénticos a README_ParteI), ventana de adjudicación 2023-2024, con `scripts/exploracion/medir_participantes.py` y `medir_participantes_extra.py`; una segunda ejecución independiente reprodujo las cifras principales. Coinciden los 2 756 compradores y 39 819 proveedores de la Parte I. Hay 83 648 adjudicaciones frente a 81 724: las 1 924 adicionales no tienen proveedor y `build_fact_award_item.py:160` las descarta.
 
 | Dato en el OCDS | ¿Se extrae hoy? | Cobertura medida |
 |---|---|---|
@@ -91,7 +91,7 @@ Eje común: **concentración y estructura del mercado de compras públicas**. So
 **Piloto (`scripts/exploracion/piloto_p1.py`), exploratorio:**
 - 1 091 unidades comprador × segmento con 10 o más procesos y 5 o más competitivos con participantes, de 601 compradores; 392 si se exigen 20. Segmentos principales: 72 (construcción), 81 (ingeniería), 30 (materiales de construcción).
 - Cuota del principal proveedor: mediana 0,14, p90 0,32, máximo 0,82.
-- Spearman concentración vs participantes: -0,26 (≥10 procesos) y -0,14 (≥20), confirmado por Codex con la mediana convencional. El piloto mezcla adjudicaciones de todas las modalidades con participación solo competitiva; el análisis final usa el mismo conjunto.
+- Spearman concentración vs participantes: -0,26 (≥10 procesos) y -0,14 (≥20), confirmado con la mediana convencional. El piloto mezcla adjudicaciones de todas las modalidades con participación solo competitiva; el análisis final usa el mismo conjunto.
 - El 17 % de los procesos no tiene clasificación CUBSO: exclusión declarada.
 
 **Protocolo fijado ahora** (como el piloto ya miró la asociación, el resultado se presenta como exploratorio y no como confirmación independiente):

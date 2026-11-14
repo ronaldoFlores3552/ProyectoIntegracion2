@@ -6,7 +6,7 @@
 
 ## Propósito y regla de continuidad
 
-Este documento es el mapa de trabajo del Proyecto Integrador 2. Explica el problema, la arquitectura, las herramientas, el orden de desarrollo y el estado real del repositorio. Debe permitir que un compañero o una IA asuma el trabajo sin reconstruir el contexto desde cero.
+Este documento es el mapa de trabajo del Proyecto Integrador 2. Explica el problema, la arquitectura, las herramientas, el orden de desarrollo y el estado real del repositorio. Debe permitir que un compañero asuma el trabajo sin reconstruir el contexto desde cero.
 
 Para el estado vigente de la Parte I, consultar [README_ParteI.md](README_ParteI.md). El [plan anterior](ReporteYPlanCierreParte1.md) se conserva como historial.
 
@@ -265,7 +265,7 @@ Esta sección es acumulativa. Una decisión reemplazada se marca como **superada
 
 El detalle técnico de E-003 y E-004 permanece en [ReporteSolucionHadoopWindows.md](ReporteSolucionHadoopWindows.md). Es un registro histórico; E-005 actualiza su pendiente de validación Docker.
 
-## 10. Protocolo de relevo para una IA o nuevo integrante
+## 10. Protocolo de relevo para un nuevo integrante
 
 1. Leer este documento, [ContratoDatos.md](ContratoDatos.md) y [ComandosEjecutarOrdenReplica.md](ComandosEjecutarOrdenReplica.md).
 2. Revisar git status; preservar cambios ajenos y no borrar datos o artefactos sin instrucción explícita.
