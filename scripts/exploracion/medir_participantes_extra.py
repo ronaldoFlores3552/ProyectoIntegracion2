@@ -26,7 +26,8 @@ pairs_cap = 0
 part_wins = C.Counter()
 part_procs = C.Counter()
 for f in sys.argv[1:]:
-    with gzip.open(f, "rt") as h:
+    # Los releases OCDS se publican en UTF-8; declararlo evita depender de cp1252 en Windows.
+    with gzip.open(f, "rt", encoding="utf-8") as h:
         for line in h:
             r = json.loads(line)
             t = r.get("tender", {})

@@ -1,6 +1,6 @@
 # Reporte estratégico y bitácora de desarrollo
 
-**Última actualización:** 2026-10-25
+**Última actualización:** 2026-11-14
 
 **Estado del documento:** vivo; se actualiza, no se reemplaza ni se borra su historial.
 
@@ -15,6 +15,11 @@ está en [PlanParteIIClustering.md](PlanParteIIClustering.md); los resultados y
 pendientes actuales están en [README_ParteII.md](README_ParteII.md).
 
 La Parte III se diseñó en [PlanParteIIIRecomendacion.md](PlanParteIIIRecomendacion.md); la evaluación retrospectiva local y sus límites están en [README_ParteIII.md](README_ParteIII.md).
+
+El replanteamiento vigente de las preguntas y sus mediciones iniciales está en
+[ReplanteamientoPreguntas.md](ReplanteamientoPreguntas.md). La reproducción
+local de esas mediciones y el protocolo pendiente para validar su semántica se
+registran en [ReporteReproduccionReplanteamiento20261114.md](ReporteReproduccionReplanteamiento20261114.md).
 
 Reglas de actualización:
 
@@ -44,12 +49,17 @@ El objetivo no es ejecutar algoritmos por cumplir una lista. Cada técnica debe 
 
 | Línea | Pregunta de trabajo | Producto esperado |
 |---|---|---|
-| Mercado y concentración | ¿Qué entidades, categorías o proveedores concentran contratación y cómo cambia por año? | Indicadores descriptivos, concentración y visualizaciones. |
-| Tipologías | ¿Qué perfiles de entidades o proveedores aparecen al agrupar compras, montos y categorías? | Vectores, clustering comparado e interpretación. |
-| Recomendación | ¿Qué proveedores o categorías son similares o relevantes para una entidad bajo criterios explícitos? | Matriz de interacción, baselines y evaluación offline. |
-| Red contractual | ¿Qué actores son centrales y qué comunidades o submercados se observan? | Grafos, centralidades, comunidades y validaciones. |
-| Representaciones | ¿Un embedding mejora una tarea analítica concreta? | SVD, Node2Vec u otro método comparado con baseline. |
-| Comunicación | ¿Cómo se presentan hallazgos y límites sin sobrerreclamar? | Artefactos trazables y reporte web o interactivo. |
+| P1. Concentración y participación | Dentro de rubro, modalidad, tamaño y departamento, ¿la concentración de adjudicaciones se asocia a menor participación reportada? | Tabla comprador×segmento×modalidad, HHI/cuota principal, bootstrap por comprador y nulo de ganador. |
+| P2. Estructura de mercado | ¿La co-participación reportada se fragmenta más de lo esperable por tamaño de proceso y recurrencia, y ese cierre se asocia a P1? | Bipartitos, proyección normalizada, centralidades, comunidades, nulo y SVD. |
+| P3. Extensión | ¿Qué relaciones son inusuales y qué sustitutos aparecen dentro de un submercado? | Híbrido ALS+TF-IDF y vecinos restringidos por rubro; sólo tras cerrar P1 y P2. |
+| Comunicación | ¿Cómo se presentan hallazgos y límites sin sobrerreclamar? | Tres módulos reproducibles con parámetros, cobertura, incertidumbre y reporte web posterior. |
+
+**Estado de estas preguntas:** las mediciones iniciales de P1 se reprodujeron
+el 14 de noviembre sobre los raw verificados. `tenderers` conserva el nombre
+de **participantes reportados**: aún no se puede inferir competencia efectiva
+ni causalidad territorial hasta contrastar una muestra con el Listado de
+ofertantes de OECE. P1 es exploratoria; P2 todavía requiere las nuevas tablas
+a grano de proceso y participante.
 
 ## 3. Arquitectura objetivo
 
@@ -251,6 +261,7 @@ Esta sección es acumulativa. Una decisión reemplazada se marca como **superada
 | E-013 | 2026-10-25 | Primera evaluación descriptiva KMeans++ y HDBSCAN en entidades 2023–2024. | Validada en Windows y Docker; provisional | k=4 y silueta 0,359; HDBSCAN 15/5 produjo 46 grupos y 48,9 % de ruido en Windows, 48,7 % en Docker. Los vectores repetidos y el peso de categorías exigen cautela. |
 | E-014 | 2026-10-25 | Cierre descriptivo de la Parte II con Ward en muestra y sensibilidad de HDBSCAN. | Completada con límites | ARI Ward/KMeans 0,483 en 400 entidades; HDBSCAN varía con remuestreos y no se adopta como tipología definitiva. |
 | E-015 | 2026-10-25 | Formulación de la Parte III: pares nuevos con proveedores conocidos, validación 2023 y prueba 2024, popularidad, vecindario y ALS implícito. | Planificado | Evaluación retrospectiva, no disponibilidad histórica probada; auditoría temporal, cobertura y modelos pendientes. |
+| E-016 | 2026-11-14 | Integración local del PR #2 y réplica de sus tres mediciones sobre los raw 2023 y 2024. | Validado localmente; semántica pendiente | Se corrigió la lectura explícita UTF-8 para Windows. Se reprodujeron 2 756 compradores, 39 819 proveedores, 114 147 participantes y el piloto P1 (Spearman −0,262 con umbral 10). Los detalles, hashes y límites están en ReporteReproduccionReplanteamiento20261114.md. |
 
 El detalle técnico de E-003 y E-004 permanece en [ReporteSolucionHadoopWindows.md](ReporteSolucionHadoopWindows.md). Es un registro histórico; E-005 actualiza su pendiente de validación Docker.
 
