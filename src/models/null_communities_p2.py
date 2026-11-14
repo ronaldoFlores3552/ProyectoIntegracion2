@@ -22,7 +22,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--participation-dir", type=Path, default=Path("data/processed/participation")
     )
-    parser.add_argument("--communities-dir", type=Path, default=Path("artifacts/p2/communities"))
+    parser.add_argument("--department", default="PUNO")
     parser.add_argument("--output-dir", type=Path, default=Path("artifacts/p2/null"))
     parser.add_argument("--min-recurrent-processes", type=int, default=5)
     parser.add_argument("--max-recurrent-participants", type=int, default=30)
@@ -75,21 +75,18 @@ def run() -> None:
     args = parse_args()
     if args.replicates < 1 or args.trades_per_participant < 1:
         raise ValueError("Réplicas y trades deben ser positivos.")
-    participation_dir, communities_dir, output_dir = (
-        args.participation_dir.resolve(),
-        args.communities_dir.resolve(),
-        args.output_dir.resolve(),
-    )
+    participation_dir, output_dir = args.participation_dir.resolve(), args.output_dir.resolve()
     if not (participation_dir / "fact_tenderer" / "_SUCCESS").is_file():
         raise FileNotFoundError("Falta fact_tenderer publicado.")
-    if not (communities_dir / "runs.csv").is_file():
-        raise FileNotFoundError("Falta la corrida Louvain observada.")
     if output_dir.exists() and not args.overwrite:
         raise FileExistsError(f"Ya existe {output_dir}; use --overwrite para regenerar.")
     rows = pd.read_parquet(
-        participation_dir / "fact_tenderer", columns=["process_ocid", "participant_id"]
-    )
-    rows = rows.drop_duplicates()
+        participation_dir / "fact_tenderer",
+        columns=["process_ocid", "buyer_id", "participant_id"],
+    ).drop_duplicates()
+    buyers = pd.read_parquet(participation_dir / "dim_buyer", columns=["buyer_id", "department"])
+    rows = rows.merge(buyers, on="buyer_id", how="inner", validate="many_to_one")
+    rows = rows.loc[rows.department == args.department, ["process_ocid", "participant_id"]]
     recurrent = rows.groupby("participant_id").process_ocid.nunique()
     rows = rows.loc[
         rows.participant_id.isin(recurrent[recurrent >= args.min_recurrent_processes].index)
@@ -105,12 +102,12 @@ def run() -> None:
         sum(process in values for values in adjacency) for process in range(len(processes))
     ]
     participant_sizes = [len(values) for values in adjacency]
-    observed = pd.read_csv(communities_dir / "runs.csv")
+    observed_graph = build_projection(adjacency, process_sizes, args.max_recurrent_participants)
+    observed_partition = community_louvain.best_partition(
+        observed_graph, weight="weight", resolution=args.resolution, random_state=args.louvain_seed
+    )
     observed_modularity = float(
-        observed.loc[
-            (observed.resolution == args.resolution) & (observed.seed == args.louvain_seed),
-            "modularity",
-        ].iloc[0]
+        community_louvain.modularity(observed_partition, observed_graph, weight="weight")
     )
     results = []
     for replicate in range(args.replicates):
@@ -143,6 +140,9 @@ def run() -> None:
     result.to_csv(stage / "replicates.csv", index=False)
     summary = {
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
+        "department": args.department,
+        "observed_nodes": observed_graph.number_of_nodes(),
+        "observed_edges": observed_graph.number_of_edges(),
         "observed_modularity": observed_modularity,
         "null_mean": float(result.modularity.mean()),
         "null_ci_low": float(result.modularity.quantile(0.025)),
