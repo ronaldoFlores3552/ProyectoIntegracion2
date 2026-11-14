@@ -32,6 +32,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--start-award-year", type=int, default=2023)
     parser.add_argument("--end-award-year", type=int, default=2024)
     parser.add_argument("--min-recurrent-processes", type=int, default=5)
+    parser.add_argument(
+        "--max-recurrent-participants",
+        type=int,
+        help=(
+            "Excluye de la proyección procesos con más participantes recurrentes; "
+            "conserva cobertura."
+        ),
+    )
     parser.add_argument("--master", default="local[*]", help="Spark master; use local[*] en local.")
     parser.add_argument("--overwrite", action="store_true")
     return parser.parse_args()
@@ -77,7 +85,9 @@ def build_participation_edges(tenderers: DataFrame) -> DataFrame:
 
 
 def build_coparticipation(
-    tenderers: DataFrame, min_recurrent_processes: int
+    tenderers: DataFrame,
+    min_recurrent_processes: int,
+    max_recurrent_participants: int | None = None,
 ) -> tuple[DataFrame, DataFrame]:
     """Project recurrent reported participants with Newman-style process-size weights."""
     rows = (
@@ -91,6 +101,9 @@ def build_coparticipation(
         .where(F.col("participant_process_count") >= min_recurrent_processes)
     )
     retained = rows.join(recurrent.select("participant_id"), "participant_id", "inner")
+    size_cap = F.lit(True)
+    if max_recurrent_participants is not None:
+        size_cap = F.col("recurrent_participant_count") <= max_recurrent_participants
     coverage = (
         rows.groupBy("process_ocid")
         .agg(F.count("*").cast("long").alias("reported_participant_count"))
@@ -102,7 +115,7 @@ def build_coparticipation(
             "left",
         )
         .fillna({"recurrent_participant_count": 0})
-        .withColumn("is_projectable", (F.col("recurrent_participant_count") >= 2).cast("boolean"))
+        .withColumn("is_projectable", ((F.col("recurrent_participant_count") >= 2) & size_cap))
     )
     projectable = retained.join(
         coverage.where(F.col("is_projectable")).select(
@@ -157,6 +170,8 @@ def run() -> None:
         raise ValueError("La ventana de adjudicación es inválida.")
     if args.min_recurrent_processes < 2:
         raise ValueError("El umbral de recurrencia debe ser al menos 2 procesos.")
+    if args.max_recurrent_participants is not None and args.max_recurrent_participants < 2:
+        raise ValueError("El máximo de participantes recurrentes debe ser al menos 2.")
     participation_dir, awards_dir, output = (
         args.participation_dir.resolve(),
         args.awards_dir.resolve(),
@@ -189,7 +204,7 @@ def run() -> None:
         award_edges = build_award_edges(tenders, awards)
         participation_edges = build_participation_edges(tenderers)
         process_coverage, coparticipation_edges = build_coparticipation(
-            tenderers, args.min_recurrent_processes
+            tenderers, args.min_recurrent_processes, args.max_recurrent_participants
         )
         _assert_unique(award_edges, ["buyer_id", "supplier_id"], "graph_award_edges")
         _assert_unique(
@@ -227,6 +242,9 @@ def run() -> None:
                 "minimum_processes": args.min_recurrent_processes,
                 "universe": "fact_tenderer; participantes reportados",
             },
+            "maximum_recurrent_participants_per_projected_process": (
+                args.max_recurrent_participants
+            ),
             "coparticipation_weight": (
                 "Para cada proceso con k participantes recurrentes, cada par único recibe 1/(k-1)."
             ),
