@@ -50,7 +50,8 @@ seg_cover = C.Counter()
 unit = C.defaultdict(lambda: {"sup": C.Counter(), "procs": 0, "noncomp": 0, "parts": []})
 buyer = C.defaultdict(lambda: {"procs": 0, "noncomp": 0, "parts": [], "type": None})
 for f in sys.argv[1:]:
-    with gzip.open(f, "rt") as h:
+    # Los releases OCDS se publican en UTF-8; declararlo evita depender de cp1252 en Windows.
+    with gzip.open(f, "rt", encoding="utf-8") as h:
         for line in h:
             r = json.loads(line)
             aws = [a for a in r.get("awards", []) if year_lima(a.get("date")) in WIN]
