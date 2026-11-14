@@ -85,3 +85,13 @@ def test_coparticipation_filters_recurrence_orders_pairs_and_normalizes(
     assert result[("x1", "x2")]["newman_weight"] == pytest.approx(2.5)
     assert result[("x1", "x3")]["shared_process_count"] == 1
     assert result[("x1", "x3")]["newman_weight"] == pytest.approx(0.5)
+
+    capped_coverage, capped_edges = build_coparticipation(
+        tenderers, min_recurrent_processes=2, max_recurrent_participants=2
+    )
+    capped_p1 = capped_coverage.where("process_ocid = 'p1'").first().asDict()
+
+    assert capped_p1["is_projectable"] is False
+    assert capped_edges.where("participant_left = 'x1' AND participant_right = 'x2'").first()[
+        "newman_weight"
+    ] == pytest.approx(2.0)
