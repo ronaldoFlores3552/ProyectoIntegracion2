@@ -5,6 +5,13 @@ sobre contrataciones públicas del Perú en formato OCDS.
 
 ## Replicación
 
+Para estudiar y sustentar el recorrido desde los fundamentos hasta la Parte III,
+consulta la [guía explicativa del proyecto](docs/README_Guia_Proyecto.md).
+
+La [guía de exposición en Visual Studio Code](docs/GUIA_EXPOSICION_VSCODE.md)
+indica el orden de archivos, resultados y explicaciones para presentar desde el
+entorno hasta la Parte III.
+
 Las instrucciones para Windows, Linux y macOS están en
 [docs/ComandosEjecutarOrdenReplica.md](docs/ComandosEjecutarOrdenReplica.md).
 
