@@ -72,6 +72,22 @@ def main() -> None:
     close(puno["null_ci_low"], 0.0838140064, "Nulo Puno IC inferior", failures)
     close(puno["null_ci_high"], 0.0904952211, "Nulo Puno IC superior", failures)
 
+    overlap_dir = ROOT / "artifacts/p2/overlap_puno"
+    if not (overlap_dir / "_SUCCESS").is_file():
+        failures.append("BigCLAM Puno: falta _SUCCESS")
+    else:
+        overlap = read_json("artifacts/p2/overlap_puno/metadata.json")
+        if overlap["parameters"]["department"] != "PUNO":
+            failures.append("BigCLAM Puno: el departamento no es PUNO")
+        if overlap["coverage"]["nodes_in_projection"] != 1908:
+            failures.append("BigCLAM Puno: la proyección no tiene 1 908 nodos")
+        if overlap["coverage"]["edges_in_projection"] != 84962:
+            failures.append("BigCLAM Puno: la proyección no tiene 84 962 aristas")
+        if not 0 < overlap["coverage"]["share_nodes_in_multiple_communities"] < 1:
+            failures.append("BigCLAM Puno: falta solapamiento no trivial")
+        if overlap["diagnostics"]["objective_final"] < overlap["diagnostics"]["objective_initial"]:
+            failures.append("BigCLAM Puno: el objetivo disminuyó")
+
     profiles = read_json("artifacts/buyer_clustering/metadata.json")
     if profiles["kmeans_selected"]["k"] != 5:
         failures.append("Perfiles: KMeans final no tiene k=5")
@@ -155,10 +171,14 @@ def main() -> None:
     notebook_04 = read_json("notebooks/04_clustering_y_anomalias.ipynb")
     notebook_06 = read_json("notebooks/06_recomendacion.ipynb")
     notebook_07 = read_json("notebooks/07_auditoria_contenido.ipynb")
+    notebook_08 = read_json("notebooks/08_p1_p2_redes_y_comunidades.ipynb")
+    notebook_09 = read_json("notebooks/09_sintesis_entrega_y_reporte.ipynb")
     for notebook, expected in (
         (notebook_04, "experimento histórico"),
         (notebook_06, "híbrido RRF"),
         (notebook_07, "híbrido RRF"),
+        (notebook_08, "BigCLAM"),
+        (notebook_09, "capa de lectura"),
     ):
         markdown = "\n".join(
             "".join(cell.get("source", []))
