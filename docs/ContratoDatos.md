@@ -184,3 +184,24 @@ Los artefactos regenerables `artifacts/recommendation_baseline`, `recommendation
 - La resolución de proveedores duplicados aún no se aplica aquí: primero se conserva el identificador publicado y se realizará en un módulo dedicado, dejando trazabilidad entre identificador original y canónico.
 - Los postores de `tender.tenderers` no se incorporan a esta tabla. Se utilizarán después para construir un grafo de co-participación separado.
 
+## Extensión P1/P2 planificada: objetos a grano de proceso
+
+**Estado: diseño aprobado; aún no implementado.** No se añadirá la lista
+`tender.tenderers` a `fact_award_item`, porque esa tabla tiene grano
+proceso×adjudicación×proveedor×ítem y multiplicaría participantes por ítem o
+adjudicación. La extensión publicará tablas separadas, con `_SUCCESS` y
+`_metadata.json`, a partir de los mismos releases con SHA-256 verificado.
+
+| Tabla propuesta | Grano | Campos mínimos | Uso y restricción |
+|---|---|---|---|
+| `fact_tender` | un proceso (`process_ocid`) | comprador, fechas, modalidad, `number_of_tenderers`, clasificación CUBSO y trazabilidad | Denominador de P1. Debe documentar la regla cuando un proceso tiene varios segmentos. |
+| `fact_tenderer` | proceso×participante reportado | `process_ocid`, comprador, ID/nombre del participante y trazabilidad | Base de participación y P2. Debe eliminar duplicados dentro del proceso y cuantificar nulos. |
+| `dim_buyer` | un comprador | ID/nombre, dirección, departamento, región, distrito e identificadores publicados | La dirección es del comprador; no se interpreta como lugar de ejecución. |
+| `buyer_segment_method` | comprador×segmento×modalidad×ventana | procesos, HHI, cuota principal, participantes y cobertura | P1 calcula concentración y participación sobre el mismo universo competitivo. |
+
+La etiqueta interpretativa se mantiene como **participante reportado**. La
+lista se contrastará contra el Listado de ofertantes de OECE y contra
+`numberOfTenderers`; hasta entonces no se denomina oferta efectiva ni postor
+confirmado. Los montos provendrán de `fact_award`, nunca de la suma de
+`fact_award_item`.
+

@@ -63,7 +63,8 @@ tenderer_wins = C.Counter()
 cons_with_members = 0
 cons_total = set()
 for f in files:
-    with gzip.open(f, "rt") as h:
+    # Los releases OCDS se publican en UTF-8; declararlo evita depender de cp1252 en Windows.
+    with gzip.open(f, "rt", encoding="utf-8") as h:
         for line in h:
             r = json.loads(line)
             seen_ocid[r["ocid"]] += 1
