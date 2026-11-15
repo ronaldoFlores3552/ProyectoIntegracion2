@@ -198,7 +198,10 @@ def stages(master: str) -> dict[str, list[list[str]]]:
                 "--overwrite",
             ],
         ],
-        "web": [["-m", "src.web.export_web_data", "--overwrite"]],
+        "web": [
+            ["-m", "src.web.export_web_data", "--overwrite"],
+            ["-m", "src.web.publish_web_data"],
+        ],
     }
 
 

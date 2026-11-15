@@ -21,8 +21,8 @@ compradores cuyos procesos atraen a una sola comunidad son los más concentrados
 ## Resultados
 
 Todo es asociativo y descriptivo: ningún resultado prueba competencia efectiva ni
-irregularidad. El detalle, con sus límites, está en el reporte interactivo y en los notebooks
-08 y 09.
+irregularidad. El detalle, con sus límites, está en el [reporte interactivo](#reporte-interactivo)
+y en los notebooks 08 y 09.
 
 | Tema | Resultado |
 |---|---|
@@ -32,7 +32,7 @@ irregularidad. El detalle, con sus límites, está en el reporte interactivo y e
 | Perfiles (II) | KMeans++ con k = 5 (silueta 0,343) separa perfiles de compra; los atípicos son el 2 % más alejado del centroide de su perfil. |
 | Recomendación (III) | En validación 2023, ALS logra NDCG@10 de 0,056 y el híbrido ALS + TF-IDF 0,040. Los sustitutos por segmento aparecen en un mismo proceso futuro el 46 % de las veces, frente al 14 % al azar. |
 | Enlaces (IV) | PageRank casi repite la fuerza de los nodos. HITS depende del peso: con conteos, un solo proveedor concentra el 83,8 % de la autoridad; con log1p, el 4,2 %. |
-| Comunidades (V) | Louvain, espectral y Girvan-Newman sobre Puno. Con BigCLAM, el 50,3 % de los participantes queda en dos o más comunidades, según el umbral de pertenencia. |
+| Comunidades (V) | Louvain, espectral y Girvan-Newman sobre Puno. Con BigCLAM, el 50,3 % de los participantes queda en dos o más comunidades, según el umbral de pertenencia. BigCLAM llegó al tope de 300 iteraciones sin cumplir el criterio de convergencia (cambio relativo final 2,6×10⁻⁵ frente a 1×10⁻⁵), así que sus afiliaciones se leen como análisis de sensibilidad, no como un óptimo. |
 | Representación (VI) | El SVD de participación con t-SNE ordena a los compradores por territorio (AMI 0,51 con el departamento) y en parte por comunidad (0,29). Perfiles y comunidades coinciden poco (NMI 0,232). |
 | Validación OECE | En los 74 052 procesos cruzados con el Listado de ofertantes, el 29,7 % de las participaciones reportadas en OCDS (proceso × participante) corresponde a una oferta, y el 99,6 % de las ofertas está en la lista OCDS: la lista OCDS es mucho más amplia que la de ofertantes. Repetidos con ofertantes, P1 centrado da 0,030 [−0,084; 0,122] y Puno Q = 0,716 frente a [0,136; 0,142] en su nulo. |
 
@@ -88,7 +88,7 @@ lectura y ejecuta solo comprobaciones ligeras por defecto; no recalcula modelos 
 | `comunidades` | Particiones en Puno, BigCLAM y cierre comunitario frente a concentración |
 | `representacion` | SVD, convergencia y t-SNE |
 | `oece` | Validación con el Listado de ofertantes y P1 y P2 repetidos con ofertantes |
-| `web` | JSON del reporte interactivo en `artifacts/web_data/` |
+| `web` | JSON del reporte en `artifacts/web_data/` y copia curada, sin proveedores ni participantes, en `web/data/` |
 
 Para comprobar el resultado:
 
@@ -96,6 +96,29 @@ Para comprobar el resultado:
 pytest -q
 python scripts/verify_delivery_consistency.py --final
 ```
+
+## Reporte interactivo
+
+El reporte técnico es la página [`web/index.html`](web/index.html): HTML y JavaScript sin
+dependencias que leen los JSON versionados de [`web/data/`](web/data/). Cada hallazgo es un
+módulo con pregunta, visualización, controles e interpretación. Los parámetros clave se
+ajustan en vivo: umbral, modalidad y ajuste de P1 (el ρ de Spearman se recalcula en el
+navegador), k de KMeans y configuración de HDBSCAN, número de recomendaciones, amortiguamiento
+de PageRank (recalculado sobre el núcleo de Puno), peso de HITS, método y número de comunidades
+de Girvan-Newman, y k del embedding.
+
+Para verla en local hay que servirla por HTTP, porque el navegador no carga JSON desde `file://`:
+
+```bash
+python -m http.server 8000 --directory web
+```
+
+y abrir <http://localhost:8000>. La etapa `pipeline web` regenera `artifacts/web_data/` y
+publica la copia curada con `src/web/publish_web_data.py`, que se detiene si encuentra
+identificadores o nombres de proveedores o participantes. El workflow
+[`.github/workflows/pages.yml`](.github/workflows/pages.yml) publica la carpeta `web/` en
+GitHub Pages al actualizar `main` (requiere elegir "GitHub Actions" como fuente en
+Settings → Pages).
 
 ## Dónde corre cada etapa
 
@@ -130,7 +153,7 @@ src/models/         análisis, clustering, recomendación, enlaces, comunidades 
 src/web/            exportación de datos para el reporte interactivo
 notebooks/          lectura e interpretación de los resultados, del 01 al 09
 tests/              pruebas unitarias (pytest)
-web/                reporte interactivo
+web/                reporte interactivo (index.html) y sus datos públicos (data/)
 ```
 
 ## Notebooks
