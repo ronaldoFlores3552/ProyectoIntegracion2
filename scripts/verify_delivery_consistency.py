@@ -1,6 +1,6 @@
 """Comprueba que artefactos, documentos y notebooks coincidan con las cifras de la entrega.
 
-Las cifras esperadas viven en scripts/cifras_entrega.json, fijadas tras la auditoría de la corrida.
+Las cifras esperadas viven en scripts/cifras_entrega.json, fijadas tras revisar la corrida.
 No reentrena modelos ni modifica archivos. La web se revisa solo con --final, al cierre.
 """
 
@@ -61,6 +61,9 @@ def observed() -> dict[str, float]:
         row for row in als["results"] if row["config"]["rank"] == als["selected"]["rank"]
     )
     hybrid = read_json("artifacts/recommendation_hybrid/_metadata.json")
+    oece = read_json("artifacts/oece_validation/summary.json")
+    oece_p1 = p1_row("artifacts/p1/analysis_oece/association_results.csv", "10", "stratum_centered")
+    oece_null = read_json("artifacts/p2/null_oece/summary.json")
     return {
         "p1_rho_centrado_10": float(p1["correlation"]),
         "p1_ic_inferior": float(p1["ci_low"]),
@@ -90,6 +93,10 @@ def observed() -> dict[str, float]:
         "nmi_perfil_comunidad": convergence["nmi_profile_cluster_dominant_community"],
         "als_validacion_ndcg10": als_selected["metrics_macro"]["10"]["ndcg"],
         "hibrido_validacion_ndcg10": hybrid["metrics_macro"]["10"]["ndcg"],
+        "oece_reportados_ofertan": oece["reported_that_bid"],
+        "oece_ofertantes_en_lista": oece["bidders_in_reported"],
+        "oece_p1_centrado_10": float(oece_p1["correlation"]),
+        "oece_puno_q": oece_null["observed_modularity"],
     }
 
 

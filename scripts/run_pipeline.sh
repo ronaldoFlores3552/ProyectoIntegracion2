@@ -86,11 +86,24 @@ representacion() {
   run src.models.embed_visualization_p2 --overwrite
 }
 
+oece() {
+  run src.quality.validate_tenderers_oece --overwrite
+  run src.features.build_market_p1 --participation-dir data/processed/participation_oece \
+    --output-dir data/processed/market_p1_oece --master "$MASTER" --overwrite
+  run src.models.analyze_market_p1 --market-dir data/processed/market_p1_oece \
+    --participation-dir data/processed/participation_oece --output-dir artifacts/p1/analysis_oece \
+    --overwrite
+  run src.models.null_communities_p2 --participation-dir data/processed/participation_oece \
+    --replicates 50 --trades-per-participant 50 --output-dir artifacts/p2/null_oece --overwrite
+  run src.models.partition_subgraph_p2 --participation-dir data/processed/participation_oece \
+    --output-dir artifacts/p2/partition_oece --overwrite
+}
+
 web() {
   run src.web.export_web_data --overwrite
 }
 
-ALL=(base parte1 clustering participacion recomendacion p1 p2 perfiles comunidades representacion web)
+ALL=(base parte1 clustering participacion recomendacion p1 p2 perfiles comunidades representacion oece web)
 STAGES=("$@")
 [ ${#STAGES[@]} -eq 0 ] && STAGES=("${ALL[@]}")
 for stage in "${STAGES[@]}"; do
