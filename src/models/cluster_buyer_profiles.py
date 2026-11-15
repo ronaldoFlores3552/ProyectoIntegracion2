@@ -1,4 +1,8 @@
-"""Clustering renovado de compradores con perfiles no contaminados por P1."""
+"""Clustering renovado de compradores con perfiles no contaminados por P1.
+
+Corre en local con scikit-learn y hdbscan: HDBSCAN y Ward no existen en Spark ML y son 2 756
+compradores.
+"""
 
 from __future__ import annotations
 

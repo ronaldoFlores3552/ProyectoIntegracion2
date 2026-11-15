@@ -1,4 +1,7 @@
-"""Relaciona perfiles de comprador, SVD y comunidades P2 sin forzar convergencia."""
+"""Relaciona perfiles de comprador, SVD y comunidades P2 sin forzar convergencia.
+
+Corre en local: compara etiquetas y vectores de unos 2 700 compradores.
+"""
 
 from __future__ import annotations
 

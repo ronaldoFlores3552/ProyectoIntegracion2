@@ -1,4 +1,8 @@
-"""Publica perfiles de compradores para Fase 6 sin variables resultado de P1."""
+"""Publica perfiles de compradores para Fase 6 sin variables resultado de P1.
+
+Corre en Spark: agrega por comprador las 928 mil participaciones y las adjudicaciones de 2023 y
+2024.
+"""
 
 from __future__ import annotations
 

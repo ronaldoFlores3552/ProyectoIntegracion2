@@ -1,4 +1,7 @@
-"""Publica vectores, matriz dispersa y grafo KNN de la Parte I con Spark."""
+"""Publica vectores, matriz dispersa y grafo KNN de la Parte I con Spark.
+
+Corre en Spark: la matriz y el grafo KNN se derivan de todas las adjudicaciones de 2023 y 2024.
+"""
 
 from __future__ import annotations
 

@@ -1,4 +1,7 @@
-"""Perfil reproducible de calidad y EDA inicial para fact_award_item."""
+"""Perfil reproducible de calidad y EDA inicial para fact_award_item.
+
+Corre en Spark: perfila la tabla completa sin traerla a memoria.
+"""
 
 from __future__ import annotations
 
