@@ -27,3 +27,10 @@ def test_stale_patterns_skip_negative_interval_bound() -> None:
     assert failures == []
     verify.check_text("doc", "NMI 0,137", [], failures)
     assert len(failures) == 1
+
+
+def test_final_web_controls_match_the_report() -> None:
+    page = (Path(__file__).resolve().parents[1] / "web" / "index.html").read_text(encoding="utf-8")
+    failures: list[str] = []
+    verify.check_text("web", page, list(verify.WEB_CONTROLS), failures)
+    assert failures == []

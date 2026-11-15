@@ -1,2 +1,206 @@
 <!doctype html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Proyecto 2 · Compras públicas</title><style>body{font:16px system-ui;margin:0;background:#f5f7fb;color:#152238}main{max-width:1000px;margin:auto;padding:36px}h1{font-size:2.3rem}section{background:white;border-radius:14px;padding:22px;margin:18px 0;box-shadow:0 2px 10px #0011}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.card{background:#edf3ff;padding:14px;border-radius:10px}.n{font-size:1.5rem;font-weight:700;color:#1559b0}small{color:#53627a}strong{color:#0f467f}</style></head><body><main><h1>Estructura de compras públicas</h1><p>Resultados reproducibles 2023–2024. Las señales describen registros y relaciones publicadas; no prueban competencia, colusión ni irregularidades.</p><section><h2>P1 · Concentración y participación</h2><div class="grid"><div class="card"><div class="n">−0,050</div>Spearman ajustado, ≥10 procesos</div><div class="card"><div class="n">[−0,136; 0,078]</div>IC bootstrap por comprador</div><div class="card"><div class="n">52 106</div>procesos comparables</div></div><p><strong>Conclusión:</strong> la asociación bruta no persiste al controlar departamento, CUBSO, modalidad y tamaño.</p></section><section><h2>P2 · Red y comunidades</h2><div class="grid"><div class="card"><div class="n">25 379</div>participantes, red k≤30</div><div class="card"><div class="n">1 698 528</div>aristas ponderadas</div><div class="card"><div class="n">0,623–0,629</div>modularidad Louvain 1,5</div></div><p>La estabilidad entre semillas fue ARI 0,840–0,869. En Puno, la modularidad observada fue 0,612 frente a nulo [0,084; 0,090].</p></section><section><h2>Convergencia y recomendación</h2><div class="grid"><div class="card"><div class="n">k=5</div>perfiles de compradores</div><div class="card"><div class="n">35,46 %</div>varianza SVD, 8 componentes</div><div class="card"><div class="n">0,137</div>NMI perfil–comunidad</div></div><p>Los perfiles, SVD y comunidades no convergen fuertemente. El híbrido ALS+TF-IDF por fusión de rangos alcanzó NDCG@10 0,040; ALS continúa como referencia (0,056).</p></section><section><h2>Límites</h2><p>Los participantes son <strong>participantes reportados</strong>; no se validó el cruce fila a fila OECE por indisponibilidad de sus archivos. Los resultados son retrospectivos y exploratorios.</p><small>Fuentes: artefactos locales P1, P2, SVD, clustering y recomendación. La web presenta salidas precalculadas; no recalcula modelos.</small></section></main></body></html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Compras públicas del Perú · Proyecto Integrador 2</title>
+  <style>
+    :root { color-scheme: light; --ink:#172033; --muted:#5f6b7c; --paper:#fff; --wash:#f4f7fc; --line:#d9e2f0; --blue:#0759b8; --teal:#007f7a; --amber:#a85c00; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:var(--wash); color:var(--ink); font:16px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif; }
+    main { max-width:1120px; margin:auto; padding:34px 20px 64px; }
+    header { padding:22px 0 16px; }
+    h1 { max-width:850px; margin:0; font-size:clamp(2rem,5vw,3.4rem); line-height:1.08; letter-spacing:-.04em; }
+    h2 { margin:0 0 8px; font-size:1.35rem; }
+    h3 { margin:0 0 4px; font-size:1rem; }
+    p { margin:8px 0; }
+    .lede, .muted { color:var(--muted); }
+    .lede { max-width:790px; font-size:1.08rem; }
+    .notice { border-left:4px solid var(--blue); background:#eaf3ff; padding:11px 14px; border-radius:0 8px 8px 0; margin:18px 0; }
+    section { margin-top:22px; padding:22px; border:1px solid var(--line); border-radius:16px; background:var(--paper); box-shadow:0 2px 12px #1522380c; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin:17px 0; }
+    .card { padding:14px; border-radius:12px; background:#f5f8fd; border:1px solid #e5edf9; }
+    .number { color:var(--blue); font-size:1.55rem; font-weight:750; letter-spacing:-.03em; }
+    .controls { display:flex; flex-wrap:wrap; gap:12px; margin:16px 0; padding:14px; background:#f7f9fc; border-radius:12px; }
+    label { display:grid; gap:4px; color:var(--muted); font-size:.88rem; font-weight:650; }
+    select { min-width:210px; padding:8px 10px; color:var(--ink); background:white; border:1px solid #b8c7dc; border-radius:7px; font:inherit; }
+    .finding { padding:14px; background:#eff8f7; border-left:4px solid var(--teal); border-radius:0 8px 8px 0; }
+    .warning { border-left-color:var(--amber); background:#fff7eb; }
+    .chart { width:100%; min-height:112px; padding:12px; background:#fbfcff; border:1px solid #e6edf7; border-radius:10px; }
+    .bar { display:grid; grid-template-columns:minmax(85px,170px) 1fr auto; gap:10px; align-items:center; margin:8px 0; font-size:.9rem; }
+    .bar > i { display:block; min-height:10px; border-radius:5px; background:linear-gradient(90deg,var(--blue),#62a5f5); }
+    code { padding:2px 5px; border-radius:4px; background:#eef2f7; }
+    footer { padding:24px 4px; color:var(--muted); font-size:.9rem; }
+    @media (max-width:560px) { main { padding:22px 14px 48px; } section { padding:17px; } select { min-width:100%; } .bar { grid-template-columns:80px 1fr auto; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="muted">Proyecto Integrador 2 · Minería de Datos · UTEC · adjudicaciones 2023–2024</p>
+      <h1>Estructura de las compras públicas del Perú</h1>
+      <p class="lede">Exploración reproducible de concentración, participación, redes y comunidades. Las señales son descriptivas: no prueban competencia efectiva, colusión ni irregularidades.</p>
+    </header>
+
+    <p id="data-status" class="notice">Cargando datos exportados…</p>
+
+    <section aria-labelledby="p1-title">
+      <h2 id="p1-title">P1 · Concentración y participación</h2>
+      <p class="muted">¿Los compradores con adjudicaciones más concentradas reciben menos participantes al comparar mercados equivalentes?</p>
+      <div class="controls">
+        <label>Comparación
+          <select id="p1-adjustment">
+            <option value="raw">Asociación bruta</option>
+            <option value="stratum_centered" selected>Controlando estrato</option>
+          </select>
+        </label>
+      </div>
+      <div class="grid">
+        <article class="card"><h3>Spearman</h3><div id="p1-rho" class="number">−0,050</div></article>
+        <article class="card"><h3>Intervalo 95 %</h3><div id="p1-ci" class="number">[−0,137; 0,063]</div></article>
+        <article class="card"><h3>Lectura</h3><div id="p1-label">Sin asociación ajustada</div></article>
+      </div>
+      <p id="p1-finding" class="finding">Después de comparar estratos equivalentes, la asociación bruta no persiste.</p>
+    </section>
+
+    <section aria-labelledby="p2-title">
+      <h2 id="p2-title">P2 · Comunidades y mercados cerrados</h2>
+      <p class="muted">La red conecta participantes que aparecen en un mismo proceso. Elige la evidencia que deseas contrastar.</p>
+      <div class="controls">
+        <label>Contraste comunitario
+          <select id="community-view">
+            <option value="louvain">Louvain frente al nulo Curveball</option>
+            <option value="bigclam">BigCLAM y solapamiento</option>
+            <option value="closure">Cierre y concentración</option>
+          </select>
+        </label>
+      </div>
+      <div class="grid">
+        <article class="card"><h3 id="community-metric-label">Modularidad Puno</h3><div id="community-metric" class="number">0,612</div></article>
+        <article class="card"><h3 id="community-reference-label">Nulo 95 %</h3><div id="community-reference" class="number">[0,078; 0,080]</div></article>
+        <article class="card"><h3 id="community-read-label">Interpretación</h3><div id="community-read">Fragmentación superior al nulo</div></article>
+      </div>
+      <p id="community-finding" class="finding">En Puno, la estructura comunitaria observada excede claramente lo que explican tamaños de proceso y recurrencia.</p>
+    </section>
+
+    <section aria-labelledby="links-title">
+      <h2 id="links-title">Parte IV · Sensibilidad de enlaces</h2>
+      <p class="muted">HITS cambia sustancialmente según cómo se ponderan las apariciones de los participantes.</p>
+      <div class="controls">
+        <label>Peso de las aristas
+          <select id="hits-weight">
+            <option value="conteo">Conteo de co-participaciones</option>
+            <option value="log1p">log1p(conteo)</option>
+          </select>
+        </label>
+      </div>
+      <div class="grid">
+        <article class="card"><h3>Masa de la mayor autoridad</h3><div id="hits-mass" class="number">83,8 %</div></article>
+        <article class="card"><h3>Conclusión</h3><div id="hits-label">Predomina un nodo con conteos</div></article>
+      </div>
+      <p id="hits-finding" class="finding warning">No se adopta una única centralidad como verdad: la conclusión depende de la escala del peso.</p>
+      <div id="hits-bars" class="chart" aria-label="Comparación de sensibilidades HITS"></div>
+    </section>
+
+    <section aria-labelledby="other-title">
+      <h2 id="other-title">Perfiles, recomendación y límites</h2>
+      <div class="grid">
+        <article class="card"><h3>Perfiles</h3><div class="number">k = 5</div><p class="muted">Silueta 0,343; atípicos: 2 % más distante por perfil.</p></article>
+        <article class="card"><h3>Recomendación</h3><div class="number">0,056</div><p class="muted">NDCG@10 de ALS en validación; no es un sistema de decisión.</p></article>
+        <article class="card"><h3>Representación</h3><div class="number">0,51</div><p class="muted">AMI del embedding con departamento; orden territorial parcial.</p></article>
+      </div>
+      <p class="notice">Los participantes reportados en OCDS no equivalen necesariamente a postores válidos. La validación con OECE y los límites de cobertura deben leerse junto con cada resultado.</p>
+    </section>
+
+    <footer>
+      <p>Los datos completos se exportan con <code>python scripts/run_project.py pipeline web</code> después de reproducir las etapas necesarias. Esta página funciona con una síntesis congelada si los artefactos locales no están disponibles.</p>
+    </footer>
+  </main>
+  <script>
+    const reference = {
+      p1: { results: [
+        { adjustment: 'raw', correlation: -0.228, ci_low: null, ci_high: null },
+        { adjustment: 'stratum_centered', correlation: -0.0503362205, ci_low: -0.137436111, ci_high: 0.0629067057 }
+      ] },
+      communities: {
+        null: { observed_modularity: 0.6115438435, null_percentile_2_5: 0.0777794044, null_percentile_97_5: 0.0800907612 },
+        bigclam: { share_nodes_overlapping: 0.5026260504, selected_communities: 50 }
+      },
+      findings: {
+        closure_excess: [{ share_positive_excess: 0.68 }],
+        hits_summary: [{ weight: 'conteo', top_authority_mass: 0.838 }, { weight: 'log1p', top_authority_mass: 0.042 }]
+      }
+    };
+
+    const fmt = (value, digits = 3) => Number.isFinite(Number(value))
+      ? Number(value).toLocaleString('es-PE', { minimumFractionDigits: digits, maximumFractionDigits: digits }) : '—';
+    const pct = value => Number.isFinite(Number(value)) ? `${fmt(100 * Number(value), 1)} %` : '—';
+    const by = id => document.getElementById(id);
+    const state = { ...reference };
+
+    function p1Result() {
+      const adjustment = by('p1-adjustment').value;
+      const rows = state.p1?.results || [];
+      return rows.find(row => row.adjustment === adjustment) || reference.p1.results.find(row => row.adjustment === adjustment);
+    }
+    function renderP1() {
+      const adjusted = by('p1-adjustment').value === 'stratum_centered';
+      const row = p1Result();
+      by('p1-rho').textContent = fmt(row?.correlation);
+      by('p1-ci').textContent = row?.ci_low == null ? 'No estimado' : `[${fmt(row.ci_low)}; ${fmt(row.ci_high)}]`;
+      by('p1-label').textContent = adjusted ? 'Sin asociación ajustada' : 'Asociación descriptiva';
+      by('p1-finding').textContent = adjusted
+        ? 'Al comparar estratos equivalentes, no hay evidencia de una asociación monotónica entre HHI y participantes.'
+        : 'La asociación bruta es descriptiva; puede reflejar tamaño, rubro, modalidad o territorio.';
+    }
+    function renderCommunity() {
+      const view = by('community-view').value;
+      const communities = state.communities || reference.communities;
+      const nullModel = communities.null || reference.communities.null;
+      const bigclam = communities.bigclam || reference.communities.bigclam;
+      const closure = (state.findings?.closure_excess || [])[0] || reference.findings.closure_excess[0];
+      const content = {
+        louvain: ['Modularidad Puno', fmt(nullModel.observed_modularity), 'Nulo 95 %', `[${fmt(nullModel.null_percentile_2_5)}; ${fmt(nullModel.null_percentile_97_5)}]`, 'Fragmentación superior al nulo', 'En Puno, la estructura comunitaria observada excede claramente lo que conservan tamaños de proceso y recurrencia.'],
+        bigclam: ['Participantes solapados', pct(bigclam.share_nodes_overlapping), 'Comunidades seleccionadas', `K = ${bigclam.selected_communities ?? '—'}`, 'Pertenencia múltiple', 'BigCLAM permite que un participante pertenezca a más de una comunidad; el resultado depende del umbral declarado.'],
+        closure: ['Exceso positivo de HHI', pct(closure.share_positive_excess), 'Referencia', 'Ganador sorteado', 'Sin asociación adicional', 'El cierre comunitario no explica por sí solo el exceso de concentración respecto al nulo de ganadores.']
+      }[view];
+      ['community-metric-label', 'community-metric', 'community-reference-label', 'community-reference', 'community-read-label', 'community-read', 'community-finding'].forEach((id, index) => by(id).textContent = content[index]);
+    }
+    function renderHits() {
+      const rows = state.findings?.hits_summary || reference.findings.hits_summary;
+      const selected = by('hits-weight').value;
+      const current = rows.find(row => row.weight === selected) || reference.findings.hits_summary.find(row => row.weight === selected);
+      by('hits-mass').textContent = pct(current?.top_authority_mass);
+      by('hits-label').textContent = selected === 'conteo' ? 'Predomina un nodo con conteos' : 'La concentración disminuye con log1p';
+      by('hits-finding').textContent = selected === 'conteo'
+        ? 'Los conteos crudos concentran 83,8 % de la autoridad en el primer nodo; conviene no interpretar ese ranking aisladamente.'
+        : 'Con log1p, la masa de la mayor autoridad baja a 4,2 %, mostrando sensibilidad a la ponderación.';
+      by('hits-bars').innerHTML = rows.filter(row => ['conteo', 'log1p'].includes(row.weight)).map(row => {
+        const value = Math.max(0, Math.min(1, Number(row.top_authority_mass)));
+        return `<div class="bar"><span>${row.weight}</span><i style="width:${100 * value}%"></i><strong>${pct(value)}</strong></div>`;
+      }).join('');
+    }
+    async function loadExport(name) {
+      const response = await fetch(`../artifacts/web_data/${name}.json`);
+      if (!response.ok) throw new Error(response.status);
+      return response.json();
+    }
+    async function load() {
+      const names = ['p1', 'communities', 'findings'];
+      const loaded = await Promise.allSettled(names.map(loadExport));
+      let count = 0;
+      loaded.forEach((result, index) => {
+        if (result.status === 'fulfilled') { state[names[index]] = result.value; count += 1; }
+      });
+      by('data-status').textContent = count === names.length
+        ? 'Datos exportados cargados: puedes cambiar los supuestos y contrastes mostrados abajo.'
+        : 'Mostrando síntesis congelada. Para explorar los artefactos locales, reproduce el pipeline y exporta los datos web.';
+      renderP1(); renderCommunity(); renderHits();
+    }
+    by('p1-adjustment').addEventListener('change', renderP1);
+    by('community-view').addEventListener('change', renderCommunity);
+    by('hits-weight').addEventListener('change', renderHits);
+    load();
+  </script>
+</body>
+</html>

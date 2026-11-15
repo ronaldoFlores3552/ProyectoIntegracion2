@@ -1,7 +1,8 @@
-"""Comprueba que artefactos, documentos y notebooks coincidan con las cifras de la entrega.
+"""Comprueba que artefactos, README y notebooks coincidan con las cifras de la entrega.
 
 Las cifras esperadas viven en scripts/cifras_entrega.json, fijadas tras revisar la corrida.
-No reentrena modelos ni modifica archivos. La web se revisa solo con --final, al cierre.
+No reentrena modelos ni modifica archivos. Con --final comprueba que la web tenga
+los controles interactivos de cierre.
 """
 
 import argparse
@@ -14,6 +15,14 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 MANIFEST = ROOT / "scripts" / "cifras_entrega.json"
 STALE = [r"(?<![−-])0,137", r"\[−0,136; 0,078\]", r"\[0,084; 0,090\]", "null_puno", "overlap_puno"]
+WEB_CONTROLS = (
+    'id="p1-adjustment"',
+    'id="community-view"',
+    'id="hits-weight"',
+    "addEventListener('change', renderP1)",
+    "addEventListener('change', renderCommunity)",
+    "addEventListener('change', renderHits)",
+)
 
 
 def read_json(relative: str) -> dict:
@@ -152,9 +161,7 @@ def main() -> None:
 
     web = ROOT / "web" / "index.html"
     if args.final:
-        check_text(
-            "web/index.html", web.read_text(encoding="utf-8"), list(texts.values()), failures
-        )
+        check_text("web/index.html", web.read_text(encoding="utf-8"), list(WEB_CONTROLS), failures)
     else:
         print("Aviso: la web no se revisa hasta el cierre; ejecute con --final.")
 
