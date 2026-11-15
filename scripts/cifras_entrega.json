@@ -76,6 +76,7 @@
     },
     "bigclam_sin_comunidad": {
       "valor": 0.0635504202,
+      "tolerancia": 0.001,
       "texto": "6,4 %"
     },
     "hits_masa_conteo": {
