@@ -1,6 +1,6 @@
 # Reporte estratégico y bitácora de desarrollo
 
-**Última actualización:** 2026-11-14
+**Última actualización:** 2026-11-14 (corrida completa de P1 y P2)
 
 **Estado del documento:** vivo; se actualiza, no se reemplaza ni se borra su historial.
 
@@ -196,10 +196,10 @@ Cada fase termina con una salida, criterios de aceptación y una actualización 
 | 3. Representaciones | Crear objetos para algoritmos. | Features, matrices y grafos con diccionario. | Grano, filtros, semilla y validaciones definidos. | Publicados y validados localmente; identidad canónica y linaje histórico completo siguen como límites. |
 | 4. Clustering | Descubrir tipologías. | KMeans++, jerárquico y HDBSCAN comparados. | Métricas, estabilidad e interpretación. | Completada para la ventana descriptiva; límites y sensibilidad documentados. |
 | 5. Recomendación | Modelar interacción. | Vecindario, contenido y factores latentes. | Evaluación temporal/offline y límites explícitos. | Análisis retrospectivo y réplica Docker de la cadena directa completados para actores conocidos; arranque en frío y disponibilidad histórica pendientes. |
-| 6. Enlaces y comunidades | Caracterizar la red. | PageRank, HITS y comunidades seleccionadas. | Grafo justificado y análisis de sensibilidad. | Pendiente. |
-| 7. Representaciones de nodos | Probar embeddings útiles. | SVD, Node2Vec o alternativa justificada. | Comparación honesta con baseline. | Pendiente. |
-| 8. Síntesis y ética | Convertir resultados en evidencia. | Hallazgos, limitaciones y anexos. | Sin causalidad ni acusaciones sin sustento. | Pendiente. |
-| 9. Servicio y visualización | Exponer resultados precalculados. | API y web si aportan valor. | Contrato estable, pruebas y trazabilidad. | Pendiente. |
+| 6. Enlaces y comunidades | Caracterizar la red. | PageRank, HITS y comunidades seleccionadas. | Grafo justificado y análisis de sensibilidad. | Completada: PageRank, HITS con sensibilidad al peso, Louvain, espectral, Girvan-Newman, BigCLAM y nulo Curveball. |
+| 7. Representaciones de nodos | Probar embeddings útiles. | SVD, Node2Vec o alternativa justificada. | Comparación honesta con baseline. | Completada: SVD de adjudicación (línea base) y de participación, t-SNE y KMeans de nodos. |
+| 8. Síntesis y ética | Convertir resultados en evidencia. | Hallazgos, limitaciones y anexos. | Sin causalidad ni acusaciones sin sustento. | Redactada en ResultadosP1P2.md; falta revisión del equipo. |
+| 9. Servicio y visualización | Exponer resultados precalculados. | API y web si aportan valor. | Contrato estable, pruebas y trazabilidad. | En curso: exportador `src/web/export_web_data.py` listo; la web del repositorio se rehace al final. |
 | 10. Entrega final | Ejecutar y defender el proyecto. | Reproducción limpia, informe, presentación y demo. | Un tercero reproduce y el equipo explica decisiones. | Pendiente. |
 
 ### Orden operativo inmediato
@@ -262,6 +262,12 @@ Esta sección es acumulativa. Una decisión reemplazada se marca como **superada
 | E-014 | 2026-10-25 | Cierre descriptivo de la Parte II con Ward en muestra y sensibilidad de HDBSCAN. | Completada con límites | ARI Ward/KMeans 0,483 en 400 entidades; HDBSCAN varía con remuestreos y no se adopta como tipología definitiva. |
 | E-015 | 2026-10-25 | Formulación de la Parte III: pares nuevos con proveedores conocidos, validación 2023 y prueba 2024, popularidad, vecindario y ALS implícito. | Planificado | Evaluación retrospectiva, no disponibilidad histórica probada; auditoría temporal, cobertura y modelos pendientes. |
 | E-016 | 2026-11-14 | Integración local del PR #2 y réplica de sus tres mediciones sobre los raw 2023 y 2024. | Validado localmente; semántica pendiente | Se corrigió la lectura explícita UTF-8 para Windows. Se reprodujeron 2 756 compradores, 39 819 proveedores, 114 147 participantes y el piloto P1 (Spearman −0,262 con umbral 10). Los detalles, hashes y límites están en ReporteReproduccionReplanteamiento20261114.md. |
+| E-017 | 2026-11-14 | Corrida completa en Linux con `scripts/run_pipeline.sh` (Python 3.12.16, Java 17.0.18). | Validada localmente | Se reprodujeron 137 292 filas de `fact_award_item`, los conteos de participación y P1 (Spearman centrado −0,050). Detalle en ResultadosP1P2.md. |
+| E-018 | 2026-11-14 | Auditoría independiente de los resultados nuevos. | Correcciones aplicadas | BigCLAM con probabilidades cero, comunidad dominante mal agregada, SVD casi nulo, nulo P2 poco mezclado, Girvan-Newman no determinista y bootstrap dependiente del orden. Lista completa en ResultadosP1P2.md. |
+| D-021 | 2026-11-14 | La mezcla comunitaria de un comprador pondera por participaciones proceso × participante. | Vigente | Refleja con quién compite en sus procesos, incluida la recurrencia. |
+| D-022 | 2026-11-14 | El embedding de la Parte VI usa la matriz comprador × participante recurrente y excluye compradores con energía capturada menor a 0,05. | Vigente | La matriz de adjudicaciones deja energía mediana cero. |
+| D-023 | 2026-11-14 | Los atípicos de la Parte II son el 2 % más lejano al centroide de su perfil, con 5 o más procesos. | Vigente | El ruido de HDBSCAN (71,5 %) no es anomalía y GLOSH marcaba empates. |
+| D-024 | 2026-11-14 | El enlace P1-P2 compara el cierre comunitario con el HHI contra un nulo de ganadores con cierre fijo. | Vigente | Separa la dependencia mecánica de la participación. |
 
 El detalle técnico de E-003 y E-004 permanece en [ReporteSolucionHadoopWindows.md](ReporteSolucionHadoopWindows.md). Es un registro histórico; E-005 actualiza su pendiente de validación Docker.
 
@@ -277,7 +283,16 @@ El detalle técnico de E-003 y E-004 permanece en [ReporteSolucionHadoopWindows.
 
 ## 11. Situación actual
 
-**Actualizada el 2026-10-25.**
+**Actualizada el 2026-11-14.** Las Partes I a VI están implementadas y ejecutadas para
+adjudicaciones 2023-2024, con resultados y límites en
+[ResultadosP1P2.md](ResultadosP1P2.md). Respuestas: P1 sin asociación entre compradores
+comparables; P2 con fragmentación real por rubro; los mercados cerrados son más concentrados,
+pero no más de lo que implica su participación. Pendiente: web final del repositorio,
+publicación o video, presentación, validación con el Listado de ofertantes de OECE y revisión
+del equipo. El historial anterior de esta sección se conserva debajo.
+
+### Situación al 2026-10-25
+
 
 El proyecto tiene una base de reproducción y una primera tabla analítica funcionales. Los archivos OCDS de 2023 y 2024 fueron verificados y el pipeline publicó data/processed/fact_award_item/_SUCCESS en Windows local y Docker. La corrida de referencia produjo:
 
@@ -316,17 +331,17 @@ interactivo es obligatorio según el enunciado.
 La Parte III tiene un [plan](PlanParteIIIRecomendacion.md) y resultados retrospectivos en [README_ParteIII.md](README_ParteIII.md). La disponibilidad histórica y los casos fríos siguen abiertos.
 
 
-### Avance Parte III — auditoría temporal (25 de octubre de 2026)
+### Avance Parte III: auditoría temporal (25 de octubre de 2026)
 
 Se ejecutó [notebook 05](../notebooks/05_auditoria_recomendacion.ipynb) sobre las tablas locales y se registró la evidencia en [README_ParteIII.md](README_ParteIII.md). Las claves y las interacciones anuales concilian y se reprodujeron los conteos preliminares. Las fechas de ambos campos para todo el entrenamiento del corte 2023 son posteriores o iguales al corte; en 2024 ocurre en 51 473 de 88 395 filas. Las fechas por sí solas no reconstruyen la disponibilidad histórica. Se mantienen las ventanas exclusivamente para un análisis retrospectivo, sujeto a cobertura e identidad; no se ha entrenado ningún modelo. Siguiente fase: preparar y verificar candidatos y positivos con entrenamiento separado por corte.
 
 
-### Avance Parte III — evaluación retrospectiva (25 de octubre de 2026)
+### Avance Parte III: evaluación retrospectiva (25 de octubre de 2026)
 
 Tras comprobar la auditoría, se prepararon cortes con Spark y se contrastaron sus conteos. Se ejecutaron popularidad, vecindario por bloques y ALS, seleccionando ALS en 2023 y comparando una prueba retrospectiva en 2024. ALS logró NDCG@10 0,0657 frente a 0,0554 de vecindario y 0,0252 de popularidad en 1 879 entidades evaluables; véanse cobertura, segmentos y límites en [README_ParteIII.md](README_ParteIII.md). No se ha verificado disponibilidad histórica, ni se han evaluado arranque en frío o recomendaciones basadas en contenido.
 
 
-### Avance Parte III — contenido exploratorio (25 de octubre de 2026)
+### Avance Parte III: contenido exploratorio (25 de octubre de 2026)
 
 Se auditó la cobertura y se revisaron casos en [notebook 07](../notebooks/07_auditoria_contenido.ipynb). TF-IDF de descripciones de ítems, construido solo con eventos anteriores al corte, obtuvo NDCG@10 0,0098 y cobertura de proveedores 44,21 % en validación 2023; popularidad obtuvo 0,0217 y ALS 0,0558. La configuración no se adopta como modelo principal. La prueba de 2024 ya fue observada antes de formular el experimento y no sería independiente; los resultados y límites están en [README_ParteIII.md](README_ParteIII.md). La reproducción integral Docker sigue pendiente por daemon no disponible.
 

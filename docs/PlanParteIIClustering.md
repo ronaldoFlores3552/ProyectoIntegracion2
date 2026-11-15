@@ -1,4 +1,4 @@
-# Plan de la Parte II — Clustering y detección de anomalías
+# Plan de la Parte II: Clustering y detección de anomalías
 
 **Actualización:** 25 de octubre de 2026, hora de Lima.  
 **Estado:** plan histórico de la Parte II, completada para el alcance descriptivo definido. Los resultados y límites vigentes están en [README_ParteII.md](README_ParteII.md).
@@ -83,7 +83,7 @@ Registrar número y tamaño de grupos, porcentaje de ruido, porcentaje de entida
 
 Usar una muestra reproducible de hasta **400 entidades** porque el cálculo de distancias jerárquicas crece aproximadamente de forma cuadrática. Seleccionar entidades por muestreo aleatorio estratificado por tramos de volumen, con semilla fija, registrando límites, asignación, IDs seleccionados y cobertura por tramo. Es una muestra diseñada para comparar perfiles de diferentes tamaños, no una estimación automática de proporciones poblacionales. En caso de empates o tramos vacíos, registrar el procedimiento y reasignación de cupos.
 
-Probar enlace Ward con distancia euclidiana sobre las características transformadas y un dendrograma legible —por ejemplo truncado si hace falta—; explicar que representa solamente la muestra y cómo se eligió el corte si se compara con otras etiquetas. No interpretar la altura como monto o probabilidad. No convertir todo el universo en una matriz de distancias sin calcular y aplicar un límite de memoria.
+Probar enlace Ward con distancia euclidiana sobre las características transformadas y un dendrograma legible (por ejemplo, truncado si hace falta); explicar que representa solamente la muestra y cómo se eligió el corte si se compara con otras etiquetas. No interpretar la altura como monto o probabilidad. No convertir todo el universo en una matriz de distancias sin calcular y aplicar un límite de memoria.
 
 ### 5.5 Anomalías: señales distintas
 

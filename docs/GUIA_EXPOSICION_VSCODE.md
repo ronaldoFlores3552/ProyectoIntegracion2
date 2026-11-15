@@ -254,7 +254,9 @@ Límites que se deben mencionar:
 - La fuente no prueba qué información estaba disponible históricamente en cada corte.
 - No se evaluó arranque en frío.
 - Las listas no deciden contrataciones: no incorporan requisitos legales, precio, capacidad, competencia ni aptitud.
-- Aún faltan enlaces, comunidades, embeddings y la web del proyecto integral.
+- Enlaces, comunidades, embeddings y convergencia (P1, P2 y Partes IV a VII) están en
+  [ResultadosP1P2.md](ResultadosP1P2.md) y en los notebooks `08` y `09`; la web se actualiza al
+  cierre.
 
 ## 6. Preguntas que pueden aparecer
 
@@ -266,7 +268,7 @@ Límites que se deben mencionar:
 | ¿KMeans demuestra cuatro tipos reales? | No. Resume la población bajo variables y parámetros definidos. HDBSCAN y Ward mostraron sensibilidad y acuerdo parcial. |
 | ¿ALS recomienda a quién contratar? | No. Ordena relaciones retrospectivas entre actores conocidos; no mide elegibilidad, calidad o capacidad. |
 | ¿Por qué el texto no ganó? | Logró mayor cobertura, pero recuperó menos positivos que popularidad y ALS. Se informa como hallazgo, sin forzar una mejora. |
-| ¿Qué sigue? | Resolver identidad, conseguir snapshots históricos, evaluar actores fríos, confirmar híbrido/ANN y continuar con enlaces, comunidades, embeddings y web. |
+| ¿Qué sigue? | Resolver identidad, conseguir snapshots históricos, evaluar actores fríos, validar `tender.tenderers` con el Listado de ofertantes de OECE y publicar la web final. |
 
 ## 7. Regla para no perderte en Visual Studio Code
 
@@ -276,4 +278,4 @@ Para cada parte sigue siempre este orden:
 Archivo de código -> qué transforma o calcula -> notebook que lo analiza -> resultado -> conclusión y límite
 ```
 
-Los notebooks siguen esta secuencia: `01` calidad, `02` identidad, `03` Spark, `04` clustering, `05` auditoría temporal, `06` comparación de recomendadores y `07` contenido. Siguiendo esa secuencia presentas el proyecto completo hasta la Parte III sin depender de documentación privada.
+Los notebooks siguen esta secuencia: `01` calidad, `02` identidad, `03` Spark, `04` clustering, `05` auditoría temporal, `06` comparación de recomendadores, `07` contenido, `08` redes y comunidades de P1 y P2, y `09` síntesis de la entrega. Siguiendo esa secuencia presentas el proyecto completo sin depender de documentación privada.

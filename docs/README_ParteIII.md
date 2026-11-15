@@ -1,4 +1,4 @@
-# Parte III — Recomendación: estado y auditoría
+# Parte III: Recomendación: estado y auditoría
 
 **Actualización:** 25 de octubre de 2026, hora de Lima.  
 **Estado:** análisis retrospectivo, modelos, conclusiones y réplica de la cadena de recomendación completados para relaciones nuevas entre actores conocidos. Persisten limitaciones de arranque en frío, identidad y disponibilidad histórica; la obligatoriedad de una opción híbrida o ANN en la rúbrica requiere confirmación.

@@ -1,4 +1,4 @@
-# Parte III — Plan de recomendación entidad–proveedor
+# Parte III: Plan de recomendación entidad–proveedor
 
 **Actualización:** 25 de octubre de 2026, hora de Lima.  
 **Estado:** diseño histórico implementado y evaluado localmente para los cortes retrospectivos; los resultados y límites vigentes están en [README_ParteIII.md](README_ParteIII.md). Las cifras exploratorias de este plan son diagnósticos de los archivos locales, no resultados de modelos.
