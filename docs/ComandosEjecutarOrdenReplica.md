@@ -1,6 +1,39 @@
 # Ejecución reproducible del proyecto
 
-## Parte III — preparación y evaluación retrospectiva
+## Cadena completa con un solo comando (Linux/macOS)
+
+`scripts/run_pipeline.sh` ejecuta, en orden, todas las etapas desde los raw de
+`data/raw/` hasta los JSON del reporte web. Cada etapa sobrescribe solo sus salidas.
+
+```bash
+conda create -n py312-spark35 -c conda-forge python=3.12 openjdk=17
+conda activate py312-spark35
+pip install -r requirements.txt
+python scripts/download_data.py --years 2023 2024
+bash scripts/run_pipeline.sh
+```
+
+Para repetir solo algunas etapas: `bash scripts/run_pipeline.sh p2 comunidades web`.
+
+| Etapa | Qué produce |
+|---|---|
+| `base` | `fact_award_item`, perfil de calidad, `fact_award`, `fact_award_supplier`, interacciones anuales y evidencia de identidad |
+| `parte1` | vectores, matriz y KNN de la Parte I original |
+| `clustering` | clustering original de entidades (cuatro variables) |
+| `recomendacion` | cortes, popularidad, vecindario, ALS, prueba 2024, contenido, híbrido y sustitutos por segmento |
+| `participacion` | `fact_tender`, `fact_tenderer` y `dim_buyer` |
+| `p1` | unidad comprador × segmento × modalidad y análisis de asociación con bootstrap y nulo |
+| `p2` | bipartitos, proyección con tope de 30, diagnóstico, HITS, PageRank, sensibilidad de HITS, Louvain y nulo Curveball |
+| `perfiles` | perfiles de compradores, KMeans++, Ward, HDBSCAN y candidatos atípicos |
+| `comunidades` | Girvan-Newman, espectral y Louvain en Puno, BigCLAM y enlace cierre-concentración |
+| `representacion` | SVD de adjudicación y de participación, convergencia y t-SNE con clustering |
+| `web` | JSON ligeros en `artifacts/web_data/` para el reporte interactivo |
+
+La corrida de referencia del 14 de noviembre de 2026 usó Python 3.12.16, Java 17.0.18
+y las versiones de `requirements.txt`, con los SHA-256 de raw de
+[ReporteReproduccionReplanteamiento20261114.md](ReporteReproduccionReplanteamiento20261114.md).
+
+## Parte III: preparación y evaluación retrospectiva
 
 Después de generar `fact_award_supplier` y ejecutar la auditoría del notebook 05, desde la raíz y con Python 3.12:
 
@@ -73,7 +106,7 @@ docker compose run --rm --no-deps pipeline python -m src.models.recommendation_c
 
 Compruebe que cada comando termina con código 0 y publica `_SUCCESS` antes de continuar; si falla una etapa, corrija la causa y reanude desde ella. La réplica usa los archivos presentes, no demuestra que fueran conocidos antes de los cortes. Los modelos y tablas se comparan por contenido y métricas, no por huellas de archivos Parquet entre ejecuciones diferentes.
 
-## 1. Ruta A — Docker (recomendada)
+## 1. Ruta A: Docker (recomendada)
 
 Docker fija Python 3.12 y Java 17. El contenedor monta el repositorio: los datos
 descargados y el Parquet creado quedan en su directorio local. No ejecute aquí
@@ -233,7 +266,7 @@ comandos de Python locales.
 
    Punto de control: termina con código 0 y no imprime errores.
 
-## 2. Ruta B — Windows local (PowerShell)
+## 2. Ruta B: Windows local (PowerShell)
 
 Abra PowerShell en la raíz del repositorio. Esta ruta usa Python **3.12.x** (no
 3.13 ni 3.14), Java 17 y PySpark 3.5.6. No avance cuando un punto de control
@@ -471,7 +504,7 @@ indique un error.
 
     Punto de control: debe devolver `True`.
 
-## 3. Ruta C — Linux/macOS local (bash)
+## 3. Ruta C: Linux/macOS local (bash)
 
 Abra una terminal en la raíz del repositorio. Esta ruta necesita Python 3.12.x y
 Java 17; no usa los helpers de Windows.
