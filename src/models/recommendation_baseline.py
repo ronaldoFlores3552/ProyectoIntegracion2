@@ -1,4 +1,7 @@
-"""Evalúa el baseline de popularidad sobre la validación retrospectiva."""
+"""Evalúa el baseline de popularidad sobre la validación retrospectiva.
+
+Corre en local con pandas: la popularidad sale de unas 40 mil relaciones de entrenamiento.
+"""
 
 from __future__ import annotations
 

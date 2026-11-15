@@ -1,4 +1,7 @@
-"""Proveedores sustitutos por segmento CUBSO y afinidades inusuales comprador-proveedor."""
+"""Proveedores sustitutos por segmento CUBSO y afinidades inusuales comprador-proveedor.
+
+Corre en local con scikit-learn: compara perfiles TF-IDF solo dentro de cada segmento CUBSO.
+"""
 
 from __future__ import annotations
 

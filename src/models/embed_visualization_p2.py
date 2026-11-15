@@ -1,4 +1,7 @@
-"""Usa el SVD de compradores en t-SNE y clustering, y lo contrasta con perfiles y comunidades."""
+"""Usa el SVD de compradores en t-SNE y clustering, y lo contrasta con perfiles y comunidades.
+
+Corre en local con scikit-learn: t-SNE no existe en Spark ML y son unos 2 300 compradores.
+"""
 
 from __future__ import annotations
 

@@ -200,10 +200,15 @@ adjudicación. La extensión publicará tablas separadas, con `_SUCCESS` y
 | `dim_buyer` | un comprador | ID/nombre, dirección, departamento, región (provincia en la fuente), distrito e identificadores publicados | La dirección es del comprador; no se interpreta como lugar de ejecución. |
 | `buyer_segment_method` | comprador×segmento×modalidad×ventana | procesos, HHI, cuota principal, participantes y cobertura | P1 calcula concentración y participación sobre el mismo universo competitivo. |
 
-La etiqueta interpretativa se mantiene como **participante reportado**. La
-lista se contrastará contra el Listado de ofertantes de OECE y contra
-`numberOfTenderers`; hasta entonces no se denomina oferta efectiva ni postor
-confirmado. Los montos provendrán de `fact_award`, nunca de la suma de
+La etiqueta interpretativa se mantiene como **participante reportado**. El cruce con el
+Listado de ofertantes de OECE (`src/quality/validate_tenderers_oece.py`, por
+`tender_id = CODIGO_CONVOCATORIA`) muestra que la lista es mucho más amplia que la de
+ofertantes: en los procesos cruzados, el 29,7 % de las participaciones proceso × participante
+corresponde a una oferta, y el 99,6 % de las ofertas está en la lista. No se denomina oferta
+efectiva ni postor confirmado. Los 74 052 OCID cruzados corresponden a 73 912 convocatorias: 96 convocatorias se
+comparten entre 236 OCID, y en `participation_oece` sus ofertantes se repiten en cada uno.
+`number_of_tenderers` conserva el valor OCDS. De los 2 599 procesos sin cruce, 2 402 vienen
+del archivo OCDS 2024 y 1 687 son Adjudicaciones Simplificadas. Los montos provendrán de `fact_award`, nunca de la suma de
 `fact_award_item`.
 
 ### Salidas publicadas de P1 y P2
@@ -219,6 +224,8 @@ confirmado. Los montos provendrán de `fact_award`, nunca de la suma de
 | `data/processed/market_p2/graph_participation_edges` | comprador × participante | `src/features/build_market_p2.py` | 518 004 |
 | `data/processed/market_p2_k30/coparticipation_edges` | par de participantes recurrentes, procesos con hasta 30 recurrentes | `src/features/build_market_p2.py` | 1 698 528 aristas, 25 379 nodos |
 | `data/processed/buyer_profiles/buyer_features` | comprador | `src/features/build_buyer_profiles.py` | 2 756 |
+| `data/processed/participation_oece/fact_tenderer` | proceso × ofertante OECE | `src/quality/validate_tenderers_oece.py` | 260 123 |
+| `data/processed/participation_oece/fact_tender` | proceso cruzado con OECE | `src/quality/validate_tenderers_oece.py` | 74 052 |
 
 Reglas fijadas en la implementación:
 

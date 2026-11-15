@@ -2,11 +2,11 @@
 
 **Fecha:** 2026-10-25
 
-**Estado:** documento de diseño histórico; los artefactos base están publicados localmente. La identidad canónica sigue pendiente. Para resultados vigentes consulte [README_ParteI.md](README_ParteI.md).
+**Estado:** documento de diseño histórico; los artefactos base están publicados localmente. La identidad canónica sigue pendiente. Para resultados vigentes consulte README_ParteI.md.
 
 Para la propuesta completa de cierre de la Parte I, incluidos vectores, matriz,
 grafo KNN y estudio de particionamiento, véase
-[ReporteYPlanCierreParte1.md](ReporteYPlanCierreParte1.md). Dicho plan detalla
+ReporteYPlanCierreParte1.md. Dicho plan detalla
 entregables futuros; no significa que ya se hayan construido.
 
 ## Objetivo

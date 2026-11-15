@@ -1,4 +1,7 @@
-"""Evalúa perfiles de texto de ítems en la validación retrospectiva de 2023."""
+"""Evalúa perfiles de texto de ítems en la validación retrospectiva de 2023.
+
+Corre en local con scikit-learn: TF-IDF sobre las descripciones de ítems agregadas por proveedor.
+"""
 
 from __future__ import annotations
 

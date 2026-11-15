@@ -1,4 +1,8 @@
-"""Analiza P1 con asociación, bootstrap por comprador, nulo y sensibilidades."""
+"""Analiza P1 con asociación, bootstrap por comprador, nulo y sensibilidades.
+
+Corre en local: parte de la tabla agregada de mercados (unas 20 mil filas) y repite el bootstrap y
+el nulo sobre ella en memoria.
+"""
 
 from __future__ import annotations
 

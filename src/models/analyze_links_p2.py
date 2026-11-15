@@ -1,4 +1,8 @@
-"""Calcula HITS y PageRank reproducibles sobre los grafos P2 aprobados."""
+"""Calcula HITS y PageRank reproducibles sobre los grafos P2 aprobados.
+
+Corre en local con scipy: los grafos de P2 caben como matrices dispersas y la iteración de potencias
+no necesita distribuirse.
+"""
 
 from __future__ import annotations
 

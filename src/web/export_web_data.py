@@ -1,4 +1,7 @@
-"""Exporta los artefactos del proyecto a JSON ligeros para el reporte web."""
+"""Exporta los artefactos del proyecto a JSON ligeros para el reporte web.
+
+Corre en local: lee artefactos pequeños y escribe JSON.
+"""
 
 from __future__ import annotations
 
@@ -122,28 +125,70 @@ def summary(processed: Path, artifacts: Path) -> dict:
     }
 
 
-def p1(processed: Path, artifacts: Path) -> dict:
-    units = pd.read_parquet(processed / "market_p1" / "buyer_segment_method")
-    units = units.loc[units.process_count >= 5].dropna(
+def p1_units(market: Path) -> pd.DataFrame:
+    units = pd.read_parquet(market / "buyer_segment_method")
+    return units.loc[units.process_count >= 5].dropna(
         subset=["hhi", "reported_participants_median"]
     )
+
+
+def p1_columns(units: pd.DataFrame) -> dict:
+    return {
+        "department": units.department.tolist(),
+        "segment": units.cubso_segment.tolist(),
+        "method": units.procurement_method_details.tolist(),
+        "processes": units.process_count.astype(int).tolist(),
+        "hhi": rounded(units.hhi, 17),
+        "top_share": rounded(units.top_supplier_share),
+        "participants": rounded(units.reported_participants_median, 6),
+    }
+
+
+def p1(processed: Path, artifacts: Path) -> dict:
+    units = p1_units(processed / "market_p1")
     results = pd.read_csv(artifacts / "p1" / "analysis" / "association_results.csv")
     null = pd.read_csv(artifacts / "p1" / "analysis" / "null_summary.csv")
     methods = units.procurement_method_details.value_counts()
     return {
-        "units": {
-            "department": units.department.tolist(),
-            "segment": units.cubso_segment.tolist(),
-            "method": units.procurement_method_details.tolist(),
-            "processes": units.process_count.astype(int).tolist(),
-            "hhi": rounded(units.hhi),
-            "top_share": rounded(units.top_supplier_share),
-            "participants": rounded(units.reported_participants_median, 2),
-        },
+        "units": p1_columns(units),
         "methods": methods.index.tolist(),
         "results": json.loads(results.to_json(orient="records")),
         "null": json.loads(null.to_json(orient="records")),
         "metadata": read_json(artifacts / "p1" / "analysis" / "metadata.json")["coverage"],
+    }
+
+
+def oece(processed: Path, artifacts: Path) -> dict:
+    base = artifacts / "oece_validation"
+    analysis = artifacts / "p1" / "analysis_oece"
+    comparison = pd.read_csv(base / "comparison.csv")
+    methods = comparison.loc[
+        (comparison.level == "procurement_method_details") & (comparison.processes >= 400)
+    ]
+    partition = pd.read_csv(artifacts / "p2" / "partition_oece" / "runs.csv")
+    louvain = partition.loc[(partition.scope == "giant") & (partition.method == "louvain")]
+    return {
+        "summary": read_json(base / "summary.json"),
+        "methods": json.loads(
+            methods[
+                [
+                    "group",
+                    "processes",
+                    "reported_median",
+                    "bidders_median",
+                    "reported_that_bid",
+                    "identical_share",
+                ]
+            ].to_json(orient="records")
+        ),
+        "p1_units": p1_columns(p1_units(processed / "market_p1_oece")),
+        "p1_results": json.loads(
+            pd.read_csv(analysis / "association_results.csv").to_json(orient="records")
+        ),
+        "p1_null": json.loads(pd.read_csv(analysis / "null_summary.csv").to_json(orient="records")),
+        "p1_metadata": read_json(analysis / "metadata.json")["coverage"],
+        "p2_null": read_json(artifacts / "p2" / "null_oece" / "summary.json"),
+        "p2_partition": json.loads(louvain.to_json(orient="records")),
     }
 
 
@@ -442,6 +487,7 @@ def run() -> None:
     write(output / "embedding.json", embedding(artifacts))
     write(output / "recommendation.json", recommendation(artifacts))
     write(output / "findings.json", findings(artifacts))
+    write(output / "oece.json", oece(processed, artifacts))
     sizes = {p.name: p.stat().st_size for p in sorted(output.glob("*.json"))}
     print(json.dumps(sizes, indent=2))
     print(f"Datos web publicados: {output}")

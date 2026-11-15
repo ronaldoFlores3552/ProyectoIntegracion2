@@ -1,4 +1,7 @@
-"""Publica una tabla con una fila por adjudicación OCDS."""
+"""Publica una tabla con una fila por adjudicación OCDS.
+
+Corre en Spark: agrupa y valida 128 mil adjudicaciones desde el grano por ítem.
+"""
 
 from __future__ import annotations
 

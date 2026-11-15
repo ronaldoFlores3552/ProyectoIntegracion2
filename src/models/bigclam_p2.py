@@ -1,4 +1,8 @@
-"""Comunidades solapadas BigCLAM en el subgrafo departamental de co-participación P2."""
+"""Comunidades solapadas BigCLAM en el subgrafo departamental de co-participación P2.
+
+Corre en local con numpy: el subgrafo de Puno tiene unos 1 900 nodos y el ajuste por nodo necesita
+acceso directo a sus vecinos.
+"""
 
 from __future__ import annotations
 

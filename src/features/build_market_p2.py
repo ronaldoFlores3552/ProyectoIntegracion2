@@ -1,4 +1,8 @@
-"""Publica los grafos base de P2 sin materializar pares fuera de Spark."""
+"""Publica los grafos base de P2 sin materializar pares fuera de Spark.
+
+Corre en Spark: la co-participación nacional genera 3,6 millones de pares que no conviene
+materializar en memoria.
+"""
 
 from __future__ import annotations
 

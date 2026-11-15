@@ -1,4 +1,7 @@
-"""Extrae evidencia OCDS de identidad sin fusionar identificadores."""
+"""Extrae evidencia OCDS de identidad sin fusionar identificadores.
+
+Corre en Spark: recorre los parties y referencias de los raw, con 1,8 millones de identificadores.
+"""
 
 from __future__ import annotations
 

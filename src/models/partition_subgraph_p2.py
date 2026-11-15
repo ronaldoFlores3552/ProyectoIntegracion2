@@ -1,4 +1,8 @@
-"""Compara Girvan-Newman, espectral y Louvain en el subgrafo departamental de P2."""
+"""Compara Girvan-Newman, espectral y Louvain en el subgrafo departamental de P2.
+
+Corre en local con networkx y scikit-learn: Girvan-Newman y el espectral exacto solo son viables en
+el subgrafo de Puno y su núcleo.
+"""
 
 from __future__ import annotations
 

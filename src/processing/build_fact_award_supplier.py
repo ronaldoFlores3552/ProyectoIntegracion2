@@ -1,4 +1,7 @@
-"""Publica una tabla con una fila por adjudicación-proveedor OCDS."""
+"""Publica una tabla con una fila por adjudicación-proveedor OCDS.
+
+Corre en Spark: deriva el grano adjudicación-proveedor desde la tabla por ítem.
+"""
 
 from __future__ import annotations
 

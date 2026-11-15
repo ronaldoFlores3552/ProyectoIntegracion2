@@ -1,4 +1,7 @@
-"""Sensibilidad de Louvain al orden de inserción de las aristas de la proyección P2."""
+"""Sensibilidad de Louvain al orden de inserción de las aristas de la proyección P2.
+
+Corre en local con networkx: repite Louvain sobre la misma proyección que detect_communities_p2.
+"""
 
 from __future__ import annotations
 

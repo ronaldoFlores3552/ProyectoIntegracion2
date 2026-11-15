@@ -1,4 +1,7 @@
-"""Compara HITS del bipartito de adjudicación bajo pesos por conteo, log1p y binario."""
+"""Compara HITS del bipartito de adjudicación bajo pesos por conteo, log1p y binario.
+
+Corre en local con scipy: el bipartito de adjudicación tiene 62 mil aristas.
+"""
 
 from __future__ import annotations
 

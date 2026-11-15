@@ -1,4 +1,7 @@
-"""Publica procesos, participantes reportados y dimensión de compradores desde OCDS."""
+"""Publica procesos, participantes reportados y dimensión de compradores desde OCDS.
+
+Corre en Spark: extrae de los raw 77 mil procesos y 928 mil participaciones reportadas.
+"""
 
 from __future__ import annotations
 
