@@ -1,4 +1,7 @@
-"""Publica la unidad comprador×segmento×modalidad para la pregunta P1."""
+"""Publica la unidad comprador×segmento×modalidad para la pregunta P1.
+
+Corre en Spark: cruza procesos, participantes y adjudicaciones antes de agregar por unidad.
+"""
 
 from __future__ import annotations
 

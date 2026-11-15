@@ -1,4 +1,8 @@
-"""Nulo P2 por Curveball: conserva tamaños de proceso y recurrencia."""
+"""Nulo P2 por Curveball: conserva tamaños de proceso y recurrencia.
+
+Corre en local con networkx: el subgrafo de Puno es pequeño y Curveball hace intercambios
+secuenciales.
+"""
 
 from __future__ import annotations
 

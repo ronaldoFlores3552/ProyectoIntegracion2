@@ -1,4 +1,7 @@
-"""Relaciona el cierre comunitario de cada mercado de P1 con su concentración."""
+"""Relaciona el cierre comunitario de cada mercado de P1 con su concentración.
+
+Corre en local: combina los mercados agregados de P1 con etiquetas de comunidad ya calculadas.
+"""
 
 from __future__ import annotations
 

@@ -4,6 +4,7 @@ setuptools==84.2.0
 pandas==2.2.3
 numpy==1.26.4
 pyarrow==19.0.1
+openpyxl==3.1.5
 scipy==1.13.1
 scikit-learn==1.6.1
 networkx==3.4.2

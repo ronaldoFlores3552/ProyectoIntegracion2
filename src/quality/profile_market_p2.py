@@ -1,4 +1,8 @@
-"""Diagnostica escala, cobertura y componentes de la proyección P2."""
+"""Diagnostica escala, cobertura y componentes de la proyección P2.
+
+Corre en Spark y en local: Spark mide escala y grados sobre los pares nacionales; los
+componentes se calculan en local con Union-Find leyendo las aristas por lotes.
+"""
 
 from __future__ import annotations
 

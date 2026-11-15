@@ -1,4 +1,7 @@
-"""Prepara cortes retrospectivos de relaciones entidad–proveedor con Spark."""
+"""Prepara cortes retrospectivos de relaciones entidad–proveedor con Spark.
+
+Corre en Spark: los cortes salen de todas las relaciones entidad-proveedor por año.
+"""
 
 from __future__ import annotations
 

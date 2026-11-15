@@ -1,4 +1,7 @@
-"""Selecciona compradores atípicos respecto de su perfil para revisión contextual."""
+"""Selecciona compradores atípicos respecto de su perfil para revisión contextual.
+
+Corre en local con scikit-learn: trabaja sobre los perfiles ya calculados de unos 2 700 compradores.
+"""
 
 from __future__ import annotations
 

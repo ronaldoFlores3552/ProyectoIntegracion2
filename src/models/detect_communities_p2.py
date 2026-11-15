@@ -1,4 +1,8 @@
-"""Explora comunidades Louvain ponderadas en la proyección P2 filtrada."""
+"""Explora comunidades Louvain ponderadas en la proyección P2 filtrada.
+
+Corre en local con networkx: Louvain no tiene implementación en Spark y la proyección con tope de 30
+participantes (1,7 millones de aristas) cabe en memoria.
+"""
 
 from __future__ import annotations
 

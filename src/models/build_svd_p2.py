@@ -1,4 +1,7 @@
-"""Publica SVD de la matriz comprador-proveedor adjudicado o comprador-participante de P2."""
+"""Publica SVD de la matriz comprador-proveedor adjudicado o comprador-participante de P2.
+
+Corre en local con scipy y scikit-learn: la matriz tiene 2 756 compradores en filas y es dispersa.
+"""
 
 from __future__ import annotations
 

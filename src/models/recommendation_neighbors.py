@@ -1,4 +1,8 @@
-"""Evalúa vecindario proveedor-proveedor en la validación retrospectiva."""
+"""Evalúa vecindario proveedor-proveedor en la validación retrospectiva.
+
+Corre en local con scipy: la matriz entidad-proveedor de entrenamiento es dispersa y cabe en
+memoria.
+"""
 
 from __future__ import annotations
 

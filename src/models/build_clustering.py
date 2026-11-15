@@ -1,4 +1,8 @@
-"""Evalúa KMeans++ y HDBSCAN sobre perfiles descriptivos de entidades."""
+"""Evalúa KMeans++ y HDBSCAN sobre perfiles descriptivos de entidades.
+
+Corre en local con scikit-learn y hdbscan: HDBSCAN no existe en Spark ML y 2 756 entidades caben en
+memoria.
+"""
 
 from __future__ import annotations
 

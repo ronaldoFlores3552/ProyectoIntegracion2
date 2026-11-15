@@ -54,6 +54,8 @@ Medición sobre los mismos archivos que usó la Parte I (SHA-256 idénticos a RE
 
 **Semántica de `tenderers` sin resolver.** El estándar OCDS los define como quienes presentan oferta, pero los valores sugieren otra cosa: Adjudicaciones Simplificadas con hasta 191, Licitaciones con hasta 205, y solo 1-2 % de procesos competitivos con un participante. Además, en 1 551 procesos `numberOfTenderers` es **menor** que la longitud de la lista (hasta 59 de diferencia). El raw no trae `bids`, `tender.status` ni `award.status` para distinguirlos. Hasta validarlo se habla de **participantes reportados**, se conservan ambas medidas y se reporta su discrepancia. Validación propuesta: cruzar una muestra con el [Listado de ofertantes de OECE](https://www.datosabiertos.gob.pe/dataset/listado-de-ofertantes-%E2%80%93-organismo-especializado-para-las-contrataciones-p%C3%BAblicas-eficientes).
 
+**Resultado de la validación (14 de noviembre).** El cruce con el Listado de ofertantes de OECE 2021-2024 encuentra el 96,6 % de los procesos. En esos procesos, el 29,7 % de las participaciones reportadas corresponde a una oferta y el 99,6 % de las ofertas está en la lista OCDS: la lista es mucho más amplia que la de ofertantes, que son casi un subconjunto suyo. P1 y P2 se repitieron con ofertantes y sus conclusiones se mantienen (ver el [README](../README.md)).
+
 ### 2.6 Decisión: priorizar a los compradores como unidad de análisis
 
 | Evidencia (ventana 2023-2024) | Compradores | Proveedores adjudicados |

@@ -1,4 +1,8 @@
-"""Construye la tabla relacional proceso-adjudicación-proveedor-ítem con Spark."""
+"""Construye la tabla relacional proceso-adjudicación-proveedor-ítem con Spark.
+
+Corre en Spark: lee los raw OCDS (171 MB comprimidos) y despliega procesos, adjudicaciones e ítems
+en paralelo.
+"""
 
 from __future__ import annotations
 

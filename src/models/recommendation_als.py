@@ -1,4 +1,7 @@
-"""Selecciona ALS implícito usando únicamente la validación retrospectiva de 2023."""
+"""Selecciona ALS implícito usando únicamente la validación retrospectiva de 2023.
+
+Corre en Spark: usa el ALS implícito de Spark ML sobre unas 40 mil relaciones de entrenamiento.
+"""
 
 from __future__ import annotations
 

@@ -1,4 +1,7 @@
-"""Evalúa una vez los métodos congelados en la prueba retrospectiva de 2024."""
+"""Evalúa una vez los métodos congelados en la prueba retrospectiva de 2024.
+
+Corre en Spark: reentrena el ALS de Spark ML para la prueba de 2024.
+"""
 
 from __future__ import annotations
 

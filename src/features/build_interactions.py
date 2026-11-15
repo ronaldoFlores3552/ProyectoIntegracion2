@@ -1,4 +1,7 @@
-"""Construye interacciones anuales por entidad, proveedor, categoría y moneda."""
+"""Construye interacciones anuales por entidad, proveedor, categoría y moneda.
+
+Corre en Spark: agrega las tablas de adjudicación completas por año, entidad, proveedor y categoría.
+"""
 
 from __future__ import annotations
 

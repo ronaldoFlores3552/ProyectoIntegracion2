@@ -118,40 +118,34 @@
     "hibrido_validacion_ndcg10": {
       "valor": 0.0400063138,
       "texto": "0,040"
+    },
+    "oece_reportados_ofertan": {
+      "valor": 0.2968554079,
+      "texto": "29,7 %"
+    },
+    "oece_ofertantes_en_lista": {
+      "valor": 0.9956866559,
+      "texto": "99,6 %"
+    },
+    "oece_p1_centrado_10": {
+      "valor": 0.0300387891,
+      "texto": "0,030"
+    },
+    "oece_puno_q": {
+      "valor": 0.715795301,
+      "texto": "0,716"
     }
   },
   "documentos": {
     "README.md": [
-      "docs/ResultadosP1P2.md",
       "−0,050",
       "[−0,137; 0,063]",
       "0,612",
       "50,3 %",
       "0,232",
-      "0,040"
-    ],
-    "docs/ResultadosP1P2.md": [
-      "p1_rho_centrado_10",
-      "p1_ic_inferior",
-      "red_nodos",
-      "red_aristas",
-      "puno_q_observado",
-      "puno_nulo_p2_5",
-      "puno_r1_q_observado",
-      "puno_r1_nulo_p97_5",
-      "bigclam_k",
-      "bigclam_solapados",
-      "bigclam_sin_comunidad",
-      "hits_masa_conteo",
-      "hits_masa_log1p",
-      "cierre_rho_bruto_10",
-      "exceso_hhi_positivo",
-      "perfiles_k",
-      "perfiles_silueta",
-      "svd_varianza",
-      "nmi_perfil_comunidad",
-      "als_validacion_ndcg10",
-      "hibrido_validacion_ndcg10"
+      "0,040",
+      "29,7 %",
+      "99,6 %"
     ],
     "notebooks/04_clustering_y_anomalias.ipynb": [
       "experimento histórico"

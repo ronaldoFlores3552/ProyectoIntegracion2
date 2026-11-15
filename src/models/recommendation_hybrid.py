@@ -1,4 +1,7 @@
-"""Evalúa un híbrido ALS--TF-IDF por fusión recíproca de rankings."""
+"""Evalúa un híbrido ALS--TF-IDF por fusión recíproca de rankings.
+
+Corre en local con pandas: solo fusiona rankings ya calculados.
+"""
 
 from __future__ import annotations
 
