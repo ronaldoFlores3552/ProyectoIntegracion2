@@ -23,6 +23,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--market-dir", type=Path, default=Path("data/processed/market_p2"))
     parser.add_argument("--communities-dir", type=Path, default=Path("artifacts/p2/communities"))
     parser.add_argument("--output-dir", type=Path, default=Path("artifacts/p2/convergence"))
+    parser.add_argument(
+        "--participation-dir", type=Path, default=Path("data/processed/participation")
+    )
     parser.add_argument("--overwrite", action="store_true")
     return parser.parse_args()
 
@@ -54,7 +57,11 @@ def run() -> None:
     communities = communities[(communities.resolution == 1.5) & (communities.seed == 42)][
         ["participant_id", "community"]
     ]
-    mix = edges.merge(communities, on="participant_id", how="inner")
+    mix = (
+        edges.merge(communities, on="participant_id", how="inner")
+        .groupby(["buyer_id", "community"], as_index=False)
+        .process_count.sum()
+    )
     mix["share"] = mix.process_count / mix.groupby("buyer_id").process_count.transform("sum")
     community = mix.groupby("buyer_id").agg(
         community_count=("community", "nunique"),
@@ -65,8 +72,12 @@ def run() -> None:
         .drop_duplicates("buyer_id")[["buyer_id", "community", "share"]]
         .rename(columns={"community": "dominant_community", "share": "dominant_community_share"})
     )
+    departments = pd.read_parquet(
+        args.participation_dir / "dim_buyer", columns=["buyer_id", "department"]
+    )
     result = (
         profiles.merge(labels, on="buyer_id", validate="one_to_one")
+        .merge(departments, on="buyer_id", how="left", validate="one_to_one")
         .merge(svd, on="buyer_id", validate="one_to_one")
         .merge(community, on="buyer_id", how="left")
         .merge(dominant, on="buyer_id", how="left")
@@ -99,9 +110,22 @@ def run() -> None:
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
         "profile_kmeans": int(k),
         "community_reference": {"resolution": 1.5, "seed": 42},
+        "community_mix_weight": "participaciones proceso-participante sumadas por comunidad",
         "buyers": len(result),
         "buyers_with_community": int(evaluable.sum()),
         "nmi_profile_cluster_dominant_community": nmi,
+        "nmi_profile_cluster_department": float(
+            normalized_mutual_info_score(
+                result.loc[evaluable, "profile_cluster"].astype(str),
+                result.loc[evaluable, "department"].astype(str),
+            )
+        ),
+        "nmi_dominant_community_department": float(
+            normalized_mutual_info_score(
+                result.loc[evaluable, "dominant_community"].astype(str),
+                result.loc[evaluable, "department"].astype(str),
+            )
+        ),
         "interpretation": (
             "NMI mide asociación entre etiquetas, no verdad ni causalidad; "
             "SVD, comunidades y perfiles pueden divergir."

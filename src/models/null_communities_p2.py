@@ -28,8 +28,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-recurrent-participants", type=int, default=30)
     parser.add_argument("--resolution", type=float, default=1.5)
     parser.add_argument("--louvain-seed", type=int, default=42)
-    parser.add_argument("--replicates", type=int, default=10)
-    parser.add_argument("--trades-per-participant", type=int, default=5)
+    parser.add_argument("--replicates", type=int, default=50)
+    parser.add_argument("--trades-per-participant", type=int, default=50)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--overwrite", action="store_true")
     return parser.parse_args()
@@ -141,18 +141,25 @@ def run() -> None:
     summary = {
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
         "department": args.department,
+        "min_recurrent_processes": args.min_recurrent_processes,
+        "max_recurrent_participants": args.max_recurrent_participants,
+        "louvain_resolution": args.resolution,
+        "louvain_seed": args.louvain_seed,
         "observed_nodes": observed_graph.number_of_nodes(),
         "observed_edges": observed_graph.number_of_edges(),
         "observed_modularity": observed_modularity,
         "null_mean": float(result.modularity.mean()),
-        "null_ci_low": float(result.modularity.quantile(0.025)),
-        "null_ci_high": float(result.modularity.quantile(0.975)),
+        "null_percentile_2_5": float(result.modularity.quantile(0.025)),
+        "null_percentile_97_5": float(result.modularity.quantile(0.975)),
+        "null_interval": "percentiles 2,5 y 97,5 de las réplicas, no un intervalo de confianza",
         "share_null_at_or_above_observed": float((result.modularity >= observed_modularity).mean()),
         "replicates": args.replicates,
         "trades_per_participant": args.trades_per_participant,
         "seed": args.seed,
     }
-    (stage / "summary.json").write_text(json.dumps(summary, indent=2) + "\n", encoding="utf-8")
+    (stage / "summary.json").write_text(
+        json.dumps(summary, indent=2, ensure_ascii=False) + "\n", encoding="utf-8"
+    )
     (stage / "_SUCCESS").touch()
     publish_output(stage, output_dir)
     print(f"Nulo P2 publicado: {output_dir}")
