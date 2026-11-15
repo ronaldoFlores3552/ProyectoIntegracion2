@@ -1,4 +1,4 @@
-# Parte II — Clustering y anomalías
+# Parte II: Clustering y anomalías
 
 **Actualización:** 25 de octubre de 2026, hora de Lima.  
 **Estado:** análisis de la Parte II completo para la ventana y los datos definidos: preparación, KMeans++, HDBSCAN, jerárquico con dendrograma e interpretación. Los resultados son descriptivos y sus límites permanecen vigentes.

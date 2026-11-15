@@ -1,4 +1,4 @@
-# Diseño técnico: Fase 2 — calidad y EDA de fact_award_item
+# Diseño técnico de la Fase 2: calidad y EDA de fact_award_item
 
 **Fecha:** 2026-10-24  
 **Estado:** perfil técnico publicado; interpretación y EDA en notebook.

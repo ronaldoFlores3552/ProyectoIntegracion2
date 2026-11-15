@@ -1,4 +1,4 @@
-# Parte I — Transformación, matrices y grafos con Spark
+# Parte I: Transformación, matrices y grafos con Spark
 
 **Actualización:** 25 de octubre de 2026, hora de Lima.  
 **Propósito:** explicar qué está construido, cómo reproducirlo y qué límites debe conocer quien continúe el proyecto o lo evalúe. Los datos de salida se regeneran y no se versionan en Git.

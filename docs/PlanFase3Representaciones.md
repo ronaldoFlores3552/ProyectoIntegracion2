@@ -1,4 +1,4 @@
-# Diseño técnico: Fase 3 — representaciones analíticas
+# Diseño técnico de la Fase 3: representaciones analíticas
 
 **Fecha:** 2026-10-25
 
