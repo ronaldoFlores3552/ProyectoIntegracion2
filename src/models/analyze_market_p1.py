@@ -116,7 +116,7 @@ def bootstrap_by_buyer(
     seed: int,
 ) -> dict[str, float | int]:
     """Resample whole buyers because each buyer can contribute several P1 units."""
-    buyer_code, buyers = pd.factorize(metrics["buyer_id"], sort=False)
+    buyer_code, buyers = pd.factorize(metrics["buyer_id"], sort=True)
     valid_rows = buyer_code >= 0
     base = metrics.loc[valid_rows].reset_index(drop=True)
     buyer_code = buyer_code[valid_rows]
@@ -135,6 +135,7 @@ def bootstrap_by_buyer(
             samples.append(float(value))
     if not samples:
         return {
+            "seed": seed,
             "replicates": replicates,
             "valid_replicates": 0,
             "ci_low": float("nan"),
@@ -142,6 +143,7 @@ def bootstrap_by_buyer(
         }
     interval = np.quantile(samples, [0.025, 0.975])
     return {
+        "seed": seed,
         "replicates": replicates,
         "valid_replicates": len(samples),
         "ci_low": float(interval[0]),
@@ -193,9 +195,14 @@ def null_associations(
     minimum_processes: list[int],
     replicates: int,
     seed: int,
+    measure: str = PRIMARY_PARTICIPATION,
 ) -> tuple[pd.DataFrame, dict[str, int]]:
     """Draw each award winner uniformly from its reported process participants."""
-    usable = events.loc[events["process_ocid"].isin(candidate_ids)].copy()
+    usable = (
+        events.loc[events["process_ocid"].isin(candidate_ids)]
+        .sort_values([*UNIT_KEYS, "process_ocid", "award_id", "supplier_id"], kind="stable")
+        .reset_index(drop=True)
+    )
     candidate_codes, _ = pd.factorize(
         pd.concat([pd.Series(values) for values in candidate_ids.values()], ignore_index=True),
         sort=True,
@@ -238,7 +245,7 @@ def null_associations(
         frame["hhi"] = simulated_hhi
         for threshold in minimum_processes:
             for adjusted in (False, True):
-                statistic = association(frame, PRIMARY_PARTICIPATION, threshold, adjusted)
+                statistic = association(frame, measure, threshold, adjusted)
                 rows.append(
                     {
                         "replicate": replicate,
