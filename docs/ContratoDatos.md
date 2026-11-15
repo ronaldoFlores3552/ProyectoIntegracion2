@@ -184,3 +184,49 @@ Los artefactos regenerables `artifacts/recommendation_baseline`, `recommendation
 - La resolución de proveedores duplicados aún no se aplica aquí: primero se conserva el identificador publicado y se realizará en un módulo dedicado, dejando trazabilidad entre identificador original y canónico.
 - Los postores de `tender.tenderers` no se incorporan a esta tabla. Se utilizarán después para construir un grafo de co-participación separado.
 
+## Extensión P1/P2: objetos a grano de proceso
+
+**Estado: implementada y ejecutada para adjudicaciones 2023-2024** (ver tabla de
+salidas al final de esta sección). No se añadirá la lista
+`tender.tenderers` a `fact_award_item`, porque esa tabla tiene grano
+proceso×adjudicación×proveedor×ítem y multiplicaría participantes por ítem o
+adjudicación. La extensión publicará tablas separadas, con `_SUCCESS` y
+`_metadata.json`, a partir de los mismos releases con SHA-256 verificado.
+
+| Tabla propuesta | Grano | Campos mínimos | Uso y restricción |
+|---|---|---|---|
+| `fact_tender` | un proceso (`process_ocid`) | comprador, fechas, modalidad, `number_of_tenderers`, clasificación CUBSO y trazabilidad | Denominador de P1. Debe documentar la regla cuando un proceso tiene varios segmentos. |
+| `fact_tenderer` | proceso×participante reportado | `process_ocid`, comprador, ID/nombre del participante y trazabilidad | Base de participación y P2. Debe eliminar duplicados dentro del proceso y cuantificar nulos. |
+| `dim_buyer` | un comprador | ID/nombre, dirección, departamento, región (provincia en la fuente), distrito e identificadores publicados | La dirección es del comprador; no se interpreta como lugar de ejecución. |
+| `buyer_segment_method` | comprador×segmento×modalidad×ventana | procesos, HHI, cuota principal, participantes y cobertura | P1 calcula concentración y participación sobre el mismo universo competitivo. |
+
+La etiqueta interpretativa se mantiene como **participante reportado**. La
+lista se contrastará contra el Listado de ofertantes de OECE y contra
+`numberOfTenderers`; hasta entonces no se denomina oferta efectiva ni postor
+confirmado. Los montos provendrán de `fact_award`, nunca de la suma de
+`fact_award_item`.
+
+### Salidas publicadas de P1 y P2
+
+| Salida | Grano | Módulo | Filas o tamaño (2023-2024) |
+|---|---|---|---|
+| `data/processed/participation/fact_tender` | proceso | `src/processing/build_participation.py` | 76 651 |
+| `data/processed/participation/fact_tenderer` | proceso × participante reportado | `src/processing/build_participation.py` | 928 289 |
+| `data/processed/participation/dim_buyer` | comprador | `src/processing/build_participation.py` | 2 756 |
+| `data/processed/market_p1/buyer_segment_method` | comprador × departamento × segmento × modalidad | `src/features/build_market_p1.py` | 19 674 |
+| `data/processed/market_p1/p1_processes` | proceso competitivo de P1 | `src/features/build_market_p1.py` | 52 106 |
+| `data/processed/market_p2/graph_award_edges` | comprador × proveedor adjudicado | `src/features/build_market_p2.py` | 61 939 |
+| `data/processed/market_p2/graph_participation_edges` | comprador × participante | `src/features/build_market_p2.py` | 518 004 |
+| `data/processed/market_p2_k30/coparticipation_edges` | par de participantes recurrentes, procesos con hasta 30 recurrentes | `src/features/build_market_p2.py` | 1 698 528 aristas, 25 379 nodos |
+| `data/processed/buyer_profiles/buyer_features` | comprador | `src/features/build_buyer_profiles.py` | 2 756 |
+
+Reglas fijadas en la implementación:
+
+- El peso de una arista de co-participación suma `1/(n-1)` por cada proceso compartido,
+  donde `n` es el número de participantes recurrentes del proceso (normalización de Newman).
+- La mezcla comunitaria de un comprador o de una unidad de P1 pondera por
+  participaciones proceso × participante, sumadas por comunidad.
+- El cierre de una unidad de P1 es la proporción de esas participaciones que pertenece a
+  su comunidad más frecuente; solo los participantes recurrentes tienen comunidad.
+- Los artefactos de modelos se publican en `artifacts/` (ignorado por git) y se
+  regeneran con `bash scripts/run_pipeline.sh`.

@@ -3,7 +3,46 @@
 Análisis de grafos, clustering, recomendación y aprendizaje de representaciones
 sobre contrataciones públicas del Perú en formato OCDS.
 
+## Resultados principales
+
+Corrida 2023-2024 auditada; el detalle y sus límites están en
+[docs/ResultadosP1P2.md](docs/ResultadosP1P2.md). Todo es asociativo y descriptivo sobre
+participantes reportados; ningún resultado prueba competencia efectiva ni irregularidad.
+
+- **P1.** Concentración y participación reportada: Spearman centrado en el estrato −0,050,
+  IC 95 % [−0,137; 0,063]. No se detecta asociación monotónica tras el ajuste.
+- **P2.** La red de co-participación de Puno tiene modularidad 0,612, muy por encima del
+  nulo Curveball. Con BigCLAM, el 50,3 % de sus participantes queda en dos o más comunidades,
+  según el umbral elegido.
+- **Convergencia.** Perfiles de compra y comunidades coinciden poco (NMI 0,232).
+- **Recomendación.** El híbrido ALS + TF-IDF (NDCG@10 0,040) no supera a ALS (0,056).
+
+Las cifras congeladas están en [scripts/cifras_entrega.json](scripts/cifras_entrega.json) y se
+comprueban con `python scripts/verify_delivery_consistency.py`.
+
 ## Replicación
+
+Ejecución completa en Linux o macOS, con el entorno de `requirements.txt`
+(Python 3.12 y Java 17):
+
+```bash
+python scripts/download_data.py --years 2023 2024
+bash scripts/run_pipeline.sh
+```
+
+Los datos quedan en `data/` y los artefactos en `artifacts/`; ninguno se versiona.
+Las etapas y sus salidas están en
+[docs/ComandosEjecutarOrdenReplica.md](docs/ComandosEjecutarOrdenReplica.md).
+Los resultados de P1, P2 y las Partes IV a VII están en
+[docs/ResultadosP1P2.md](docs/ResultadosP1P2.md), y el registro de contribuciones en
+[docs/RegistroContribuciones.md](docs/RegistroContribuciones.md).
+
+Para estudiar y sustentar el recorrido desde los fundamentos hasta la Parte III,
+consulta la [guía explicativa del proyecto](docs/README_Guia_Proyecto.md).
+
+La [guía de exposición en Visual Studio Code](docs/GUIA_EXPOSICION_VSCODE.md)
+indica el orden de archivos, resultados y explicaciones para presentar desde el
+entorno hasta la Parte III.
 
 Las instrucciones para Windows, Linux y macOS están en
 [docs/ComandosEjecutarOrdenReplica.md](docs/ComandosEjecutarOrdenReplica.md).

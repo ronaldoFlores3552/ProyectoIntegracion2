@@ -1,4 +1,5 @@
 """Piloto de P1: concentración y participantes por comprador y segmento CUBSO."""
+
 import collections as C
 import gzip
 import json
@@ -8,8 +9,13 @@ import sys
 from datetime import datetime, timedelta
 
 WIN = {2023, 2024}
-NONCOMP_DETAILS = {"Contratación Directa", "Regímen Especial", "Contratación Internacional", "Convenio",
-                   "Adjudicación Abreviada"}
+NONCOMP_DETAILS = {
+    "Contratación Directa",
+    "Regímen Especial",
+    "Contratación Internacional",
+    "Convenio",
+    "Adjudicación Abreviada",
+}
 
 
 def year_lima(s):
@@ -36,9 +42,10 @@ def spearman(x, y):
                 r[order[k]] = (i + j) / 2
             i = j + 1
         return r
+
     rx, ry = ranks(x), ranks(y)
     mx, my = sum(rx) / len(rx), sum(ry) / len(ry)
-    cov = sum((a - mx) * (b - my) for a, b in zip(rx, ry))
+    cov = sum((a - mx) * (b - my) for a, b in zip(rx, ry, strict=False))
     sx = math.sqrt(sum((a - mx) ** 2 for a in rx))
     sy = math.sqrt(sum((b - my) ** 2 for b in ry))
     return cov / (sx * sy) if sx and sy else float("nan")
@@ -50,7 +57,8 @@ seg_cover = C.Counter()
 unit = C.defaultdict(lambda: {"sup": C.Counter(), "procs": 0, "noncomp": 0, "parts": []})
 buyer = C.defaultdict(lambda: {"procs": 0, "noncomp": 0, "parts": [], "type": None})
 for f in sys.argv[1:]:
-    with gzip.open(f, "rt") as h:
+    # Los releases OCDS se publican en UTF-8; declararlo evita depender de cp1252 en Windows.
+    with gzip.open(f, "rt", encoding="utf-8") as h:
         for line in h:
             r = json.loads(line)
             aws = [a for a in r.get("awards", []) if year_lima(a.get("date")) in WIN]
@@ -58,7 +66,10 @@ for f in sys.argv[1:]:
                 continue
             t = r.get("tender", {})
             b = r["buyer"]["id"]
-            noncomp = t.get("procurementMethod") == "direct" or t.get("procurementMethodDetails") in NONCOMP_DETAILS
+            noncomp = (
+                t.get("procurementMethod") == "direct"
+                or t.get("procurementMethodDetails") in NONCOMP_DETAILS
+            )
             nparts = len(t.get("tenderers") or [])
             segs = C.Counter()
             for it in t.get("items", []):
@@ -95,12 +106,20 @@ for minp in (10, 20):
     hhi = [sum((c / sum(u["sup"].values())) ** 2 for c in u["sup"].values()) for _, u in units]
     nc = [u["noncomp"] / u["procs"] for _, u in units]
     mp = [statistics.median(u["parts"]) for _, u in units]
-    print(f"\n== unidades comprador x segmento con >= {minp} procesos y >= 5 competitivos con participantes: {len(units)}"
-          f" | compradores: {len({k[0] for k, _ in units})}")
-    print(f"cuota principal proveedor: mediana {q(tops, .5):.2f} p75 {q(tops, .75):.2f} p90 {q(tops, .9):.2f} max {q(tops, 1):.2f}")
-    print(f"HHI: mediana {q(hhi, .5):.3f} p90 {q(hhi, .9):.3f} | HHI mínimo posible ~1/n procesos")
-    print(f"% no competitivo: mediana {q(nc, .5):.2f} p90 {q(nc, .9):.2f}")
-    print(f"mediana de participantes en competitivos: p10 {q(mp, .1)} mediana {q(mp, .5)} p90 {q(mp, .9)}")
+    print(
+        f"\n== unidades comprador x segmento con >= {minp} procesos y >= 5 competitivos con participantes: {len(units)}"
+        f" | compradores: {len({k[0] for k, _ in units})}"
+    )
+    print(
+        f"cuota principal proveedor: mediana {q(tops, 0.5):.2f} p75 {q(tops, 0.75):.2f} p90 {q(tops, 0.9):.2f} max {q(tops, 1):.2f}"
+    )
+    print(
+        f"HHI: mediana {q(hhi, 0.5):.3f} p90 {q(hhi, 0.9):.3f} | HHI mínimo posible ~1/n procesos"
+    )
+    print(f"% no competitivo: mediana {q(nc, 0.5):.2f} p90 {q(nc, 0.9):.2f}")
+    print(
+        f"mediana de participantes en competitivos: p10 {q(mp, 0.1)} mediana {q(mp, 0.5)} p90 {q(mp, 0.9)}"
+    )
     print(f"Spearman cuota principal vs mediana participantes: {spearman(tops, mp):.3f}")
     print(f"Spearman cuota principal vs % no competitivo: {spearman(tops, nc):.3f}")
     print(f"Spearman % no competitivo vs mediana participantes: {spearman(nc, mp):.3f}")
@@ -111,6 +130,10 @@ bs = [v for v in buyer.values() if v["procs"] >= 10 and len(v["parts"]) >= 5]
 nc = [v["noncomp"] / v["procs"] for v in bs]
 mp = [statistics.median(v["parts"]) for v in bs]
 print(f"\n== compradores con >= 10 procesos y >= 5 competitivos: {len(bs)}")
-print(f"% no competitivo: p25 {q(nc, .25):.2f} mediana {q(nc, .5):.2f} p75 {q(nc, .75):.2f} p90 {q(nc, .9):.2f}")
-print(f"mediana de participantes: p10 {q(mp, .1)} p25 {q(mp, .25)} mediana {q(mp, .5)} p75 {q(mp, .75)} p90 {q(mp, .9)}")
+print(
+    f"% no competitivo: p25 {q(nc, 0.25):.2f} mediana {q(nc, 0.5):.2f} p75 {q(nc, 0.75):.2f} p90 {q(nc, 0.9):.2f}"
+)
+print(
+    f"mediana de participantes: p10 {q(mp, 0.1)} p25 {q(mp, 0.25)} mediana {q(mp, 0.5)} p75 {q(mp, 0.75)} p90 {q(mp, 0.9)}"
+)
 print(f"Spearman % no competitivo vs participantes: {spearman(nc, mp):.3f}")
