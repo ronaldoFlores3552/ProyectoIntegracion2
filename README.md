@@ -165,10 +165,10 @@ Los notebooks leen artefactos ya publicados; no recalculan el pipeline.
 | Integrante | Usuario en git | Aporte principal | Commits de referencia |
 |---|---|---|---|
 | Ronaldo Dylan Flores Soto | `ronaldoFlores3552` | Entorno reproducible (Docker, versiones, validación), ingesta con manifiesto, tablas de adjudicación, interacciones anuales, evidencia de identidad, representaciones de la Parte I, clustering inicial de la Parte II, cadena de recomendación de la Parte III y notebooks 01 a 07 | `c7cec37` a `fa65ac4` |
-| Isaac Vera Romero | `IsaacVera10`, `Isaac Vera Romero` | Replanteamiento de P1 y P2 con medición de participantes; tablas de participación; análisis de P1 con bootstrap y nulo; grafos, HITS, PageRank y Louvain de P2; perfiles renovados; SVD y convergencia; híbrido ALS + TF-IDF; particiones, BigCLAM, t-SNE y sustitutos; validación con OECE; reporte interactivo | `8ef6a14`, `916b29e`, `e29c486`, `8a03dd5`, `5f3fbf5`, `146443c`, `1ef6410` y siguientes |
-| Rodo Vilcarromero | `NotRtro` | Reproducción del replanteamiento con corrección de lectura UTF-8, diagnóstico de la proyección de P2, modelo nulo Curveball, actualización de notebooks y contratos, generador del informe PDF y verificador de la entrega | `7b4e71e`, `4db2be2`, `1bf6727`, `939fbe1`, `fcb14da` |
+| Isaac Vera Romero | `IsaacVera10`, `Isaac Vera Romero` | Replanteamiento de P1 y P2 con medición de participantes; tablas de participación; análisis de P1 con bootstrap y nulo; grafos, HITS, PageRank y Louvain de P2; perfiles renovados; SVD y convergencia; híbrido ALS + TF-IDF; particiones, BigCLAM, t-SNE y sustitutos; validación con OECE; reporte interactivo | `b8dd15e`, `e4fe670`, `cb0c6e5`, `59390bc`, `07221b6`, `bd74fe1`, `95a07ec` y siguientes |
+| Rodo Vilcarromero | `NotRtro` | Reproducción del replanteamiento con corrección de lectura UTF-8, diagnóstico de la proyección de P2, modelo nulo Curveball, actualización de notebooks y contratos, generador del informe PDF y verificador de la entrega | `7b4e71e`, `228e466`, `055fcbb`, `a279636`, `26a9fe0` |
 
-El commit `8974503` (notebooks 08 y 09, BigCLAM inicial de Puno) figura con la cuenta
+El commit `95a239f` (notebooks 08 y 09, BigCLAM inicial de Puno) figura con la cuenta
 `IsaacVera10`. La traza completa sale de:
 
 ```bash
