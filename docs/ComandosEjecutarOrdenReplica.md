@@ -10,6 +10,7 @@ conda create -n py312-spark35 -c conda-forge python=3.12 openjdk=17
 conda activate py312-spark35
 pip install -r requirements.txt
 python scripts/download_data.py --years 2023 2024
+python -m scripts.download_oece
 bash scripts/run_pipeline.sh
 ```
 
@@ -27,6 +28,7 @@ Para repetir solo algunas etapas: `bash scripts/run_pipeline.sh p2 comunidades w
 | `perfiles` | perfiles de compradores, KMeans++, Ward, HDBSCAN y candidatos atípicos |
 | `comunidades` | Girvan-Newman, espectral y Louvain en Puno, BigCLAM y enlace cierre-concentración |
 | `representacion` | SVD de adjudicación y de participación, convergencia y t-SNE con clustering |
+| `oece` | cruce con el Listado de ofertantes de OECE y P1, nulo y particiones de Puno repetidos con ofertantes (requiere `python -m scripts.download_oece`) |
 | `web` | JSON ligeros en `artifacts/web_data/` para el reporte interactivo |
 
 La corrida de referencia del 14 de noviembre de 2026 usó Python 3.12.16, Java 17.0.18
