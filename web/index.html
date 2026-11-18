@@ -1,2 +1,1256 @@
 <!doctype html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Proyecto 2 · Compras públicas</title><style>body{font:16px system-ui;margin:0;background:#f5f7fb;color:#152238}main{max-width:1000px;margin:auto;padding:36px}h1{font-size:2.3rem}section{background:white;border-radius:14px;padding:22px;margin:18px 0;box-shadow:0 2px 10px #0011}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.card{background:#edf3ff;padding:14px;border-radius:10px}.n{font-size:1.5rem;font-weight:700;color:#1559b0}small{color:#53627a}strong{color:#0f467f}</style></head><body><main><h1>Estructura de compras públicas</h1><p>Resultados reproducibles 2023–2024. Las señales describen registros y relaciones publicadas; no prueban competencia, colusión ni irregularidades.</p><section><h2>P1 · Concentración y participación</h2><div class="grid"><div class="card"><div class="n">−0,050</div>Spearman ajustado, ≥10 procesos</div><div class="card"><div class="n">[−0,136; 0,078]</div>IC bootstrap por comprador</div><div class="card"><div class="n">52 106</div>procesos comparables</div></div><p><strong>Conclusión:</strong> la asociación bruta no persiste al controlar departamento, CUBSO, modalidad y tamaño.</p></section><section><h2>P2 · Red y comunidades</h2><div class="grid"><div class="card"><div class="n">25 379</div>participantes, red k≤30</div><div class="card"><div class="n">1 698 528</div>aristas ponderadas</div><div class="card"><div class="n">0,623–0,629</div>modularidad Louvain 1,5</div></div><p>La estabilidad entre semillas fue ARI 0,840–0,869. En Puno, la modularidad observada fue 0,612 frente a nulo [0,084; 0,090].</p></section><section><h2>Convergencia y recomendación</h2><div class="grid"><div class="card"><div class="n">k=5</div>perfiles de compradores</div><div class="card"><div class="n">35,46 %</div>varianza SVD, 8 componentes</div><div class="card"><div class="n">0,137</div>NMI perfil–comunidad</div></div><p>Los perfiles, SVD y comunidades no convergen fuertemente. El híbrido ALS+TF-IDF por fusión de rangos alcanzó NDCG@10 0,040; ALS continúa como referencia (0,056).</p></section><section><h2>Límites</h2><p>Los participantes son <strong>participantes reportados</strong>; no se validó el cruce fila a fila OECE por indisponibilidad de sus archivos. Los resultados son retrospectivos y exploratorios.</p><small>Fuentes: artefactos locales P1, P2, SVD, clustering y recomendación. La web presenta salidas precalculadas; no recalcula modelos.</small></section></main></body></html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Competencia en compras públicas</title>
+  <meta name="description" content="Reporte técnico interactivo del Proyecto Integrador 2: concentración, participación, redes y comunidades en las adjudicaciones públicas del Perú, 2023-2024.">
+  <style>
+    :root {
+      color-scheme: light;
+      --surface: #fcfcfb; --page: #f3f4f1; --raised: #ffffff; --line: #dcdcd6; --grid: #e9e9e4;
+      --ink: #0b0b0b; --ink-2: #52514e; --ink-3: #74736d;
+      --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --other: #bdbcb5; --edge: #8c8b84;
+      --accent: #1c5cab; --accent-wash: #e6eefa; --note-wash: #fff4e5; --note-line: #c98500;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        color-scheme: dark;
+        --surface: #1a1a19; --page: #121211; --raised: #22221f; --line: #3a3a36; --grid: #2c2c29;
+        --ink: #f0efec; --ink-2: #c3c2b7; --ink-3: #9a998f;
+        --s1: #3987e5; --s2: #d95926; --s3: #199e70; --other: #55544e; --edge: #8a897f;
+        --accent: #86b6ef; --accent-wash: #1d2a3c; --note-wash: #2e2414; --note-line: #c98500;
+      }
+    }
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --surface: #1a1a19; --page: #121211; --raised: #22221f; --line: #3a3a36; --grid: #2c2c29;
+      --ink: #f0efec; --ink-2: #c3c2b7; --ink-3: #9a998f;
+      --s1: #3987e5; --s2: #d95926; --s3: #199e70; --other: #55544e; --edge: #8a897f;
+      --accent: #86b6ef; --accent-wash: #1d2a3c; --note-wash: #2e2414; --note-line: #c98500;
+    }
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--page); color: var(--ink); font: 16px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    a { color: var(--accent); }
+    .layout { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 28px; max-width: 1240px; margin: 0 auto; padding: 0 16px; }
+    nav.toc { position: sticky; top: 0; align-self: start; max-height: 100vh; overflow-y: auto; padding: 28px 0; font-size: .88rem; }
+    nav.toc ol { list-style: none; margin: 0; padding: 0; }
+    nav.toc li { margin: 2px 0; }
+    nav.toc a { display: block; padding: 4px 8px; border-radius: 6px; color: var(--ink-2); text-decoration: none; }
+    nav.toc a:hover, nav.toc a.active { background: var(--accent-wash); color: var(--ink); }
+    nav.toc .group { margin: 14px 8px 4px; color: var(--ink-3); font-size: .74rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+    main { min-width: 0; padding: 28px 0 64px; }
+    header.hero { padding: 12px 0 8px; }
+    .eyebrow { margin: 0; color: var(--ink-3); font-size: .85rem; font-weight: 600; }
+    h1 { margin: 6px 0 10px; font-size: clamp(2rem, 4.6vw, 3.1rem); line-height: 1.08; letter-spacing: -.03em; }
+    h2 { margin: 2px 0 6px; font-size: 1.5rem; line-height: 1.2; letter-spacing: -.01em; }
+    h3 { margin: 18px 0 6px; font-size: 1.02rem; }
+    p { margin: 8px 0; }
+    .lede { max-width: 760px; color: var(--ink-2); font-size: 1.1rem; }
+    .kicker { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0; color: var(--ink-3); font-size: .8rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+    .pill { padding: 1px 8px; border: 1px solid var(--line); border-radius: 999px; color: var(--ink-2); font-weight: 600; letter-spacing: 0; text-transform: none; }
+    .question { max-width: 780px; color: var(--ink-2); font-size: 1.04rem; }
+    section.module { margin-top: 22px; padding: 24px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; scroll-margin-top: 12px; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 18px 0; }
+    .stat { padding: 12px 14px; background: var(--raised); border: 1px solid var(--line); border-radius: 10px; }
+    .stat b { display: block; font-size: 1.55rem; line-height: 1.2; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+    .stat span { color: var(--ink-2); font-size: .86rem; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; margin: 14px 0; }
+    .card { padding: 14px; background: var(--raised); border: 1px solid var(--line); border-radius: 10px; }
+    .card h3 { margin: 0 0 4px; font-size: .92rem; color: var(--ink-2); font-weight: 650; }
+    .card .number { font-size: 1.45rem; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+    .controls { display: flex; flex-wrap: wrap; gap: 14px; align-items: end; margin: 16px 0 8px; padding: 12px 14px; background: var(--raised); border: 1px solid var(--line); border-radius: 10px; }
+    label { display: grid; gap: 4px; color: var(--ink-2); font-size: .84rem; font-weight: 650; }
+    select, input[type="range"] { font: inherit; }
+    select { min-width: 190px; padding: 6px 8px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 7px; }
+    input[type="range"] { width: 190px; accent-color: var(--s1); }
+    output { color: var(--ink); font-variant-numeric: tabular-nums; }
+    .reading { margin: 14px 0 6px; padding: 12px 16px; background: var(--accent-wash); border-left: 4px solid var(--s1); border-radius: 0 8px 8px 0; }
+    .reading strong:first-child { display: block; margin-bottom: 2px; }
+    .limit { margin: 12px 0 6px; padding: 12px 16px; background: var(--note-wash); border-left: 4px solid var(--note-line); border-radius: 0 8px 8px 0; }
+    details { margin: 12px 0 4px; padding: 10px 14px; background: var(--raised); border: 1px solid var(--line); border-radius: 10px; }
+    details summary { cursor: pointer; font-weight: 650; }
+    .two { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+    .chart { position: relative; width: 100%; }
+    .chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+    .chart-title { margin: 14px 0 2px; font-size: .92rem; font-weight: 650; }
+    .chart-note { margin: 2px 0 0; color: var(--ink-3); font-size: .82rem; }
+    .legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 6px 0; color: var(--ink-2); font-size: .84rem; }
+    .legend i { display: inline-block; width: 10px; height: 10px; margin-right: 6px; border-radius: 50%; vertical-align: -1px; }
+    .axis text { fill: var(--ink-3); font-size: 11px; }
+    .axis-label { fill: var(--ink-2); font-size: 12px; }
+    .gridline { stroke: var(--grid); stroke-width: 1; }
+    .zero { stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 3 3; }
+    .c1 { fill: var(--s1); stroke: var(--s1); } .c2 { fill: var(--s2); stroke: var(--s2); } .c3 { fill: var(--s3); stroke: var(--s3); } .c0 { fill: var(--other); stroke: var(--other); }
+    .dot { stroke: var(--surface); stroke-width: .8; }
+    .line { fill: none; stroke-width: 2; }
+    .edge { stroke: var(--edge); }
+    .bars { display: grid; gap: 6px; margin: 8px 0; }
+    .bar-row { display: grid; grid-template-columns: minmax(110px, 210px) 1fr; gap: 10px; align-items: center; font-size: .86rem; }
+    .bar-row > span { color: var(--ink-2); }
+    .bar-track { display: grid; gap: 2px; }
+    .bar { display: flex; align-items: center; gap: 8px; }
+    .bar i { display: block; height: 12px; min-width: 2px; border-radius: 0 4px 4px 0; }
+    .bar b { font-weight: 600; font-size: .82rem; font-variant-numeric: tabular-nums; }
+    .bar.dim i { opacity: .35; }
+    .bg1 { background: var(--s1); } .bg2 { background: var(--s2); } .bg3 { background: var(--s3); } .bg0 { background: var(--other); }
+    table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: .86rem; }
+    th, td { padding: 6px 8px; border-bottom: 1px solid var(--grid); text-align: left; vertical-align: top; }
+    th { color: var(--ink-2); font-weight: 650; }
+    td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
+    tr.sel td { background: var(--accent-wash); }
+    .table-wrap { overflow-x: auto; }
+    .flow { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin: 14px 0; }
+    .flow button { padding: 10px; color: var(--ink); text-align: left; background: var(--raised); border: 1px solid var(--line); border-radius: 10px; font: inherit; font-size: .88rem; cursor: pointer; }
+    .flow button[aria-pressed="true"] { border-color: var(--s1); box-shadow: inset 0 0 0 1px var(--s1); }
+    .flow button small { display: block; color: var(--ink-3); }
+    code { padding: 1px 5px; background: var(--grid); border-radius: 4px; font-size: .88em; }
+    pre { overflow-x: auto; padding: 12px; background: var(--raised); border: 1px solid var(--line); border-radius: 8px; font-size: .85rem; }
+    .status { margin: 14px 0; padding: 10px 14px; color: var(--ink-2); background: var(--raised); border: 1px solid var(--line); border-radius: 10px; font-size: .9rem; }
+    .muted { color: var(--ink-3); }
+    #tip { position: fixed; z-index: 10; max-width: 300px; padding: 7px 10px; color: var(--ink); background: var(--raised); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 4px 16px #0003; font-size: .8rem; line-height: 1.4; white-space: pre-line; pointer-events: none; }
+    footer { margin-top: 28px; color: var(--ink-3); font-size: .86rem; }
+    .theme-toggle { float: right; padding: 4px 10px; color: var(--ink-2); background: var(--raised); border: 1px solid var(--line); border-radius: 999px; font: inherit; font-size: .8rem; cursor: pointer; }
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: minmax(0, 1fr); gap: 0; }
+      nav.toc { position: static; max-height: none; padding: 16px 0 0; }
+      nav.toc ol { display: flex; flex-wrap: wrap; gap: 4px; }
+      nav.toc .group { display: none; }
+      nav.toc a { padding: 3px 8px; border: 1px solid var(--line); }
+      section.module { padding: 16px; }
+      .bar-row { grid-template-columns: 1fr; gap: 2px; }
+      select, input[type="range"] { width: 100%; min-width: 0; }
+      .controls label { flex: 1 1 160px; }
+    }
+  </style>
+</head>
+<body>
+<div class="layout">
+  <nav class="toc" aria-label="Contenido">
+    <ol>
+      <li><a href="#inicio">Inicio</a></li>
+      <li class="group">Planteamiento</li>
+      <li><a href="#planteamiento">Problema y preguntas</a></li>
+      <li><a href="#hallazgos">Hallazgos</a></li>
+      <li class="group">Rúbrica</li>
+      <li><a href="#spark">I. Base en Spark</a></li>
+      <li><a href="#datos">Datos y OECE</a></li>
+      <li><a href="#p1">P1. Concentración</a></li>
+      <li><a href="#clustering">II. Clustering</a></li>
+      <li><a href="#recomendacion">III. Recomendación</a></li>
+      <li><a href="#enlaces">IV. PageRank y HITS</a></li>
+      <li><a href="#comunidades">V. Comunidades</a></li>
+      <li><a href="#cierre">P1 y P2 juntas</a></li>
+      <li><a href="#representacion">VI. Representación</a></li>
+      <li><a href="#etica">VII. Discusión y ética</a></li>
+      <li><a href="#reproducir">Reproducir</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="hero" id="inicio">
+      <button class="theme-toggle" id="theme-toggle" type="button">Tema</button>
+      <p class="eyebrow">Proyecto Integrador 2 · Minería de Datos · UTEC 2026-2</p>
+      <h1>¿Falta de oferta o forma de comprar?</h1>
+      <p class="lede">Cuando una compra pública en el Perú tiene poca competencia, ¿es porque no hay proveedores en la zona o por la forma en que compra la entidad? Analizamos las adjudicaciones de 2023 y 2024 con Spark, grafos, clustering, recomendación y representaciones.</p>
+      <div class="stats" id="hero-stats">
+        <div class="stat"><b id="st-tenders">76 651</b><span>procesos adjudicados</span></div>
+        <div class="stat"><b id="st-participations">928 289</b><span>participaciones proceso × participante</span></div>
+        <div class="stat"><b id="st-buyers">2 756</b><span>entidades compradoras</span></div>
+        <div class="stat"><b id="st-nodes">25 379</b><span>participantes recurrentes en la red</span></div>
+      </div>
+      <p id="data-status" class="status">Cargando datos exportados…</p>
+      <p class="muted">Cada módulo sigue la estructura del enunciado: <strong>pregunta → visualización → controles → interpretación</strong>, con el método y los límites a la vista. Todo es asociativo y descriptivo: ninguna cifra prueba colusión, fraude ni irregularidad. Fuente: <a href="https://data.open-contracting.org/es/publication/135">OCDS Perú, OECE/OSCE</a>, licencia CC BY 4.0.</p>
+    </header>
+
+    <section class="module" id="planteamiento">
+      <p class="kicker">Planteamiento</p>
+      <h2>La baja competencia tiene dos causas que piden respuestas distintas</h2>
+      <div class="two">
+        <div class="card"><h3>Falta de oferta local</h3><p>En la zona no hay proveedores para ese rubro. La respuesta es de política pública: compras agregadas entre municipios o catálogos electrónicos.</p></div>
+        <div class="card"><h3>Forma de comprar</h3><p>Entidades vecinas que compran lo mismo sí atraen proveedores. Los requisitos o convocatorias de esa entidad merecen revisión.</p></div>
+      </div>
+      <h3>Preguntas</h3>
+      <p><strong>P1. Concentración y participación.</strong> Dentro de un mismo rubro y modalidad, ¿los compradores que concentran sus adjudicaciones en pocos proveedores reciben menos participantes? ¿Se mantiene al comparar compradores del mismo departamento y tamaño?</p>
+      <p><strong>P2. Mercados cerrados.</strong> ¿La red de co-participación se separa por rubro o territorio más de lo que explican el tamaño de los procesos y la recurrencia de los participantes? ¿Los compradores cuyos procesos atraen a una sola comunidad son los más concentrados?</p>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Parte</th><th>Técnica</th><th>Qué aporta a P1 y P2</th></tr></thead>
+        <tbody>
+          <tr><td>I</td><td>Spark: participación, tabla comprador × rubro × modalidad, grafos</td><td>Base de todo el análisis</td></tr>
+          <tr><td>II</td><td>KMeans++, Ward, HDBSCAN, atípicos</td><td>Perfiles de comprador para comparar entre pares</td></tr>
+          <tr><td>III</td><td>Popularidad, vecindario, ALS, TF-IDF, híbrido, sustitutos</td><td>Afinidad esperada y competidores plausibles</td></tr>
+          <tr><td>IV</td><td>PageRank, HITS</td><td>Quién es central y por qué</td></tr>
+          <tr><td>V</td><td>Louvain, espectral, Girvan-Newman, BigCLAM, nulo Curveball</td><td>Mercados cerrados y su relación con la concentración</td></tr>
+          <tr><td>VI</td><td>SVD, t-SNE, KMeans sobre el embedding</td><td>¿Convergen perfiles, comunidades y embeddings?</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section class="module" id="hallazgos">
+      <p class="kicker">Respuestas</p>
+      <h2>Lo que encontramos</h2>
+      <div class="cards">
+        <div class="card"><h3>P1: sin señal entre comparables</h3><p>Entre compradores del mismo departamento, rubro, modalidad y tamaño no se detecta asociación monotónica entre concentración y participantes: ρ = −0,050, IC 95 % [−0,137; 0,063]. La asociación bruta (−0,228) aparece al comparar mercados distintos.</p></div>
+        <div class="card"><h3>P2: la red sí está fragmentada</h3><p>En Puno, Louvain alcanza Q = 0,612 frente a [0,078; 0,080] en un nulo que conserva tamaños de proceso y recurrencia. Las comunidades siguen al rubro (AMI 0,52) mucho más que a la provincia (0,11).</p></div>
+        <div class="card"><h3>P1 y P2: cierre sin exceso asociado</h3><p>Los mercados dominados por una comunidad son más concentrados (ρ = 0,184), pero un ganador sorteado entre los mismos participantes produce la misma asociación. El 68 % de las unidades concentra por encima de esa referencia, y ese exceso no se asocia con el cierre.</p></div>
+        <div class="card"><h3>Convergencia parcial</h3><p>El embedding sigue sobre todo al territorio (AMI 0,51 con el departamento) y en parte a las comunidades (0,29). Los perfiles de compra van por otro lado (NMI 0,232 con las comunidades): qué se compra no dice con quién se compite.</p></div>
+        <div class="card"><h3>Participantes no son ofertantes</h3><p>En los 74 052 procesos cruzados con OECE, solo el 29,7 % de las participaciones reportadas corresponde a una oferta. Repetidos con ofertantes, P1 (0,030) y P2 (Q 0,716 frente a [0,136; 0,142]) llegan a las mismas conclusiones.</p></div>
+      </div>
+    </section>
+
+    <section class="module" id="spark">
+      <p class="kicker">Parte I · Transformación con Spark <span class="pill">3 pts</span></p>
+      <h2>De JSON anidado a tablas, matriz y grafos</h2>
+      <p class="question">¿Cómo se convierte un registro OCDS por proceso en objetos que permitan medir concentración, participación y redes? Haz clic en cada etapa para ver su grano, módulo y tamaño.</p>
+      <div class="flow" id="flow" role="group" aria-label="Etapas del pipeline"></div>
+      <div class="reading" id="flow-detail" aria-live="polite"></div>
+      <div class="two">
+        <div>
+          <p class="chart-title">Grado de los participantes en la proyección nacional</p>
+          <div class="bars" id="degree-bars"></div>
+          <p class="chart-note">Cuantiles del número de vecinos distintos tras el tope de 30 participantes recurrentes por proceso.</p>
+        </div>
+        <div>
+          <p class="chart-title">Componentes conexas</p>
+          <div class="bars" id="component-bars"></div>
+          <p class="chart-note" id="component-note"></p>
+        </div>
+      </div>
+      <details>
+        <summary>Cómo se hizo: particionamiento y escala</summary>
+        <p>Las tablas de interacción se escriben particionadas por <code>award_year</code>; al filtrar un año, el plan físico muestra <code>PartitionFilters</code> y Spark lee solo esa carpeta. La co-participación se calcula en Spark con un <em>self-join</em> por proceso; para que los procesos con cientos de participantes no dominen ni exploten el número de pares, se limita a procesos con hasta 30 participantes recurrentes y cada arista suma <code>1/(n−1)</code> por proceso compartido (normalización de Newman). El notebook <code>03_particionamiento_spark</code> muestra el plan físico.</p>
+        <p>Spark se usa donde se leen los raw o se generan pares a escala nacional. Louvain, Girvan-Newman, HDBSCAN, Ward y t-SNE corren en local sobre tablas agregadas o subgrafos que caben en memoria, porque no existen en Spark ML.</p>
+      </details>
+      <details>
+        <summary>Cómo se hizo: identidad de proveedores</summary>
+        <p>Se extrajeron los identificadores de cada <code>party</code> y se buscaron coincidencias exactas por esquema y valor: no hubo grupos candidatos. Los nombres repetidos con distintos ID son sobre todo consorcios distintos con nombres genéricos. Se conservan los ID originales: fusionar por nombre destruiría información correcta.</p>
+      </details>
+    </section>
+
+    <section class="module" id="datos">
+      <p class="kicker">Datos y validación</p>
+      <h2>¿Quién aparece como participante?</h2>
+      <p class="question">OCDS define <code>tenderers</code> como oferentes, pero hay procesos con cientos de nombres. ¿Coincide esa lista con quienes realmente presentaron oferta según el Listado de ofertantes de OECE?</p>
+      <div class="stats">
+        <div class="stat"><b id="oece-matched">74 052</b><span>procesos cruzados por código de convocatoria</span></div>
+        <div class="stat"><b id="oece-bid">29,7 %</b><span>de las participaciones reportadas ofertó</span></div>
+        <div class="stat"><b id="oece-in">99,6 %</b><span>de las ofertas está en la lista OCDS</span></div>
+      </div>
+      <p class="chart-title">Mediana de participantes reportados frente a ofertantes, por modalidad</p>
+      <div class="legend"><span><i class="bg1"></i>Participantes reportados (OCDS)</span><span><i class="bg2"></i>Ofertantes (OECE)</span></div>
+      <div class="bars" id="oece-bars"></div>
+      <p class="chart-note">Modalidades con 400 procesos cruzados o más. Pasa el cursor por una barra para ver la proporción de reportados que ofertó.</p>
+      <div class="reading"><strong>Lectura</strong>La lista OCDS contiene casi todas las ofertas, pero es mucho más amplia: es consistente con que incluya a quienes solo se registran. En Adjudicación Simplificada, Licitación y Concurso oferta menos de uno de cada cuatro reportados; en Comparación de Precios y Contratación Directa ambas listas casi coinciden. Por eso P1 y P2 se repitieron con ofertantes.</div>
+      <div class="limit"><strong>Límite.</strong> En el texto usamos "participantes reportados", nunca "postores". 2 599 procesos no cruzan (2 402 del archivo 2024) y 96 convocatorias se comparten entre 236 procesos.</div>
+    </section>
+
+    <section class="module" id="p1">
+      <p class="kicker">P1 · Concentración y participación <span class="pill">pregunta central</span></p>
+      <h2>¿Los compradores concentrados atraen menos participantes?</h2>
+      <p class="question">Cada punto es una unidad comprador × rubro × modalidad. El ρ de Spearman se recalcula en tu navegador. "Controlando estrato" resta la mediana de su estrato (departamento × rubro × modalidad × tamaño) para comparar solo con vecinos parecidos.</p>
+      <div class="controls">
+        <label>Comparación
+          <select id="p1-adjustment">
+            <option value="raw">Asociación bruta</option>
+            <option value="stratum_centered" selected>Controlando estrato</option>
+          </select>
+        </label>
+        <label>Mínimo de procesos <output id="p1-min-out">10</output>
+          <input id="p1-min" type="range" min="5" max="40" step="1" value="10">
+        </label>
+        <label>Modalidad
+          <select id="p1-method"><option value="">Todas</option></select>
+        </label>
+        <label>Participación
+          <select id="p1-source">
+            <option value="ocds">Participantes reportados (OCDS)</option>
+            <option value="oece">Ofertantes (OECE)</option>
+          </select>
+        </label>
+      </div>
+      <div class="cards">
+        <div class="card"><h3>ρ en tu navegador</h3><div id="p1-rho" class="number">−0,050</div><p class="muted" id="p1-units">535 unidades</p></div>
+        <div class="card"><h3>Publicado: IC 95 % (bootstrap por comprador)</h3><div id="p1-ci" class="number">[−0,137; 0,063]</div><p class="muted" id="p1-pub">1 000 réplicas</p></div>
+        <div class="card"><h3>Nulo: ganador al azar</h3><div id="p1-null" class="number">—</div><p class="muted" id="p1-label">Sin asociación ajustada</p></div>
+      </div>
+      <div class="chart" id="p1-chart"></div>
+      <p class="reading" id="p1-finding">Al comparar estratos equivalentes, no hay evidencia de una asociación monotónica entre HHI y participantes.</p>
+      <div class="reading"><strong>Lectura</strong>Sin ajustar, la asociación es negativa (ρ = −0,228 con 10 o más procesos, IC [−0,302; −0,158]). Al centrar en el estrato cae a −0,050 y su intervalo incluye el cero; con 20 procesos cambia de signo (0,079). No se detecta asociación entre compradores comparables. La referencia nula sortea cada ganador entre los participantes de su proceso y da una asociación <em>más</em> negativa que la observada en todas las simulaciones: la concentración real depende menos del número de participantes de lo que esa mecánica produciría. Sin consorcios, la asociación bruta cae a −0,051.</div>
+      <details>
+        <summary>Cómo se hizo y límites</summary>
+        <p>Solo procesos competitivos. HHI y participantes salen de los mismos procesos. El bootstrap remuestrea compradores enteros, porque un comprador aporta varias unidades. El estadístico es el Spearman de valores centrados, no una correlación parcial, y el ajuste usa menos unidades que el bruto porque descarta estratos con menos de tres unidades. Los intervalos publicados existen para 10 y 20 procesos; para otros umbrales la página muestra solo el ρ puntual. El nulo conserva identidades y solapamientos entre listas, así que no aísla una sola causa. Con ofertantes, el bruto cambia de signo (0,107) y el centrado tampoco muestra asociación (0,030, IC [−0,084; 0,122]): el bruto es sensible a cómo se cuenta la participación.</p>
+      </details>
+    </section>
+
+    <section class="module" id="clustering">
+      <p class="kicker">Parte II · Clustering y anomalías <span class="pill">3 pts</span></p>
+      <h2>Cinco perfiles de comprador</h2>
+      <p class="question">¿Qué tipos de comprador existen, para comparar a cada entidad con sus pares? Ocho variables por comprador: procesos, monto y proveedores distintos (en logaritmo), diversidad de rubros, proporción no competitiva y reparto del monto entre bienes, servicios y obras. Se excluyen concentración y participantes, que son las variables de P1.</p>
+      <div class="controls">
+        <label>Método
+          <select id="cl-method">
+            <option value="kmeans">KMeans++</option>
+            <option value="ward">Ward (jerárquico)</option>
+            <option value="hdbscan">HDBSCAN</option>
+          </select>
+        </label>
+        <label id="cl-k-wrap">k <output id="cl-k-out">5</output>
+          <input id="cl-k" type="range" min="2" max="8" step="1" value="5">
+        </label>
+        <label id="cl-h-wrap" hidden>min_cluster_size : min_samples
+          <select id="cl-h"></select>
+        </label>
+        <label>Resaltar
+          <select id="cl-highlight"></select>
+        </label>
+      </div>
+      <div class="two">
+        <div>
+          <p class="chart-title">Compradores en las dos primeras componentes principales</p>
+          <div class="legend" id="cl-legend"></div>
+          <div class="chart" id="cl-chart"></div>
+          <p class="chart-note" id="cl-pca-note"></p>
+        </div>
+        <div>
+          <p class="chart-title">Silueta por k</p>
+          <div class="legend"><span><i class="bg1"></i>KMeans++</span><span><i class="bg2"></i>Ward</span></div>
+          <div class="chart" id="cl-sil"></div>
+          <div class="table-wrap"><table id="cl-table"></table></div>
+        </div>
+      </div>
+      <p class="chart-title">Dendrograma de Ward en una muestra de 150 compradores</p>
+      <div class="chart" id="cl-dendro"></div>
+      <p class="chart-note">Las marcas bajo las hojas señalan el perfil KMeans (k = 5) resaltado.</p>
+      <div class="reading"><strong>Lectura</strong>KMeans++ con k = 5 maximiza la silueta (0,343) y es estable (ARI 0,96 a 0,99 en submuestras). Los perfiles: obras, grandes diversificados, servicios, bienes y mayormente no competitivo. Ward queda por debajo para todo k. HDBSCAN deja el 71,5 % como ruido: sus grupos densos son compradores pequeños de un solo tipo de compra, y que el resto sea "ruido" no lo convierte en anomalía.</div>
+      <h3>Compradores atípicos respecto de su perfil</h3>
+      <p class="muted" id="outlier-note">El 2 % más lejano al centro de su perfil, entre los compradores con 5 procesos o más.</p>
+      <div class="table-wrap"><table id="outlier-table"></table></div>
+      <div class="limit"><strong>Límite.</strong> El rasgo es la variable que más se aleja del centro de su perfil. Escala nacional, compras corporativas o financiamiento externo son hipótesis de contexto, no causas verificadas. Son casos para revisión contextual, no indicios de irregularidad.</div>
+    </section>
+
+    <section class="module" id="recomendacion">
+      <p class="kicker">Parte III · Recomendación <span class="pill">3 pts</span></p>
+      <h2>¿Se pueden anticipar las relaciones nuevas, y qué proveedores se parecen?</h2>
+      <p class="question">Se entrena con lo anterior a un corte y se evalúa con las relaciones comprador–proveedor nuevas del año siguiente. La validación 2023 elige el modelo; la prueba 2024 lo confirma.</p>
+      <div class="controls">
+        <label>Métrica
+          <select id="rec-metric">
+            <option value="ndcg">NDCG</option>
+            <option value="recall">Recall</option>
+            <option value="precision">Precisión</option>
+          </select>
+        </label>
+        <label>Número de recomendaciones
+          <select id="rec-k"><option value="10">10</option><option value="20">20</option></select>
+        </label>
+      </div>
+      <div class="two">
+        <div>
+          <p class="chart-title" id="rec-title">Prueba 2024</p>
+          <div class="bars" id="rec-bars"></div>
+          <p class="chart-note" id="rec-note"></p>
+        </div>
+        <div>
+          <p class="chart-title">Validación 2023, NDCG@10</p>
+          <div class="bars" id="rec-val-bars"></div>
+          <p class="chart-note">El híbrido fusiona rangos (RRF) de ALS y TF-IDF porque los modelos publican rankings truncados sin puntaje.</p>
+        </div>
+      </div>
+      <h3>Sustitutos por rubro: ¿compiten de verdad?</h3>
+      <div class="two">
+        <div>
+          <p class="chart-title">Pares que coinciden en un mismo proceso de 2024</p>
+          <div class="bars" id="subs-bars"></div>
+          <p class="chart-note" id="subs-note"></p>
+        </div>
+        <div>
+          <p class="chart-title">Afinidades inusuales por rubro del proveedor</p>
+          <div class="table-wrap"><table id="unusual-table"></table></div>
+        </div>
+      </div>
+      <div class="reading"><strong>Lectura</strong>ALS gana en la prueba 2024 frente a vecindario y popularidad. El híbrido ALS + TF-IDF queda por debajo de ALS en validación: la métrica no dice por qué la fusión empeora, así que se reporta como intento. Los sustitutos por contenido sí recuperan competidores plausibles: el más cercano aparece en un mismo proceso futuro mucho más que un proveedor al azar del rubro.</div>
+      <details>
+        <summary>Cómo se hizo y límites</summary>
+        <p>Señal implícita: <code>log1p</code> del número de adjudicaciones comprador × proveedor. Vecindario ítem-ítem con 50 vecinos; ALS implícito de Spark MLlib (16 factores elegidos en validación); TF-IDF de descripciones de ítems solo con datos anteriores al corte. Los positivos son pares nuevos con ambos actores ya conocidos, así que la evaluación excluye actores nuevos (arranque en frío). Filtrar por fecha no prueba qué información existía en cada corte. Las afinidades inusuales son señales para mirar, no recomendaciones de a quién contratar.</p>
+      </details>
+    </section>
+
+    <section class="module" id="enlaces">
+      <p class="kicker">Parte IV · PageRank y HITS <span class="pill">2 pts</span></p>
+      <h2>¿Quiénes son centrales, y por qué?</h2>
+      <p class="question">PageRank se recalcula en tu navegador sobre el núcleo de co-participación de Puno: los 120 participantes con más procesos compartidos. El tamaño del punto es su PageRank; los ocho primeros van en naranja.</p>
+      <div class="controls">
+        <label>Amortiguamiento d <output id="pr-d-out">0,85</output>
+          <input id="pr-d" type="range" min="0.05" max="0.99" step="0.01" value="0.85">
+        </label>
+      </div>
+      <div class="cards">
+        <div class="card"><h3>ρ PageRank – fuerza (núcleo)</h3><div class="number" id="pr-rho">—</div></div>
+        <div class="card"><h3>Máximo / mínimo PageRank</h3><div class="number" id="pr-ratio">—</div></div>
+        <div class="card"><h3>Red nacional: ρ con la fuerza</h3><div class="number" id="pr-national">0,96 – 0,99</div><p class="muted">d = 0,75 / 0,85 / 0,95</p></div>
+      </div>
+      <div class="chart" id="pr-chart"></div>
+      <h3>HITS en el bipartito comprador–proveedor</h3>
+      <div class="controls">
+        <label>Peso de las aristas
+          <select id="hits-weight">
+            <option value="conteo">Conteo de adjudicaciones</option>
+            <option value="log1p">log1p(conteo)</option>
+            <option value="binario">Binario</option>
+          </select>
+        </label>
+      </div>
+      <div class="cards">
+        <div class="card"><h3>Masa de la mayor autoridad</h3><div id="hits-mass" class="number">83,8 %</div></div>
+        <div class="card"><h3>Conclusión</h3><div id="hits-label">Predomina un nodo con conteos</div></div>
+      </div>
+      <div class="two">
+        <div><p class="chart-title">Masa de autoridad del primer proveedor, por peso</p><div id="hits-bars" class="bars" aria-label="Comparación de sensibilidades HITS"></div></div>
+        <div><p class="chart-title">Principales hubs (entidades compradoras)</p><div class="table-wrap"><table id="hits-table"></table></div></div>
+      </div>
+      <p id="hits-finding" class="limit">No se adopta una única centralidad como verdad: la conclusión depende de la escala del peso.</p>
+      <div class="reading"><strong>Lectura</strong>PageRank casi repite la fuerza: con la normalización de Newman la fuerza cuenta procesos compartidos, así que PageRank dice poco más que "quién participa más". Con d bajo los puntajes se igualan; con d cerca de 1 se separan los más conectados. HITS depende del peso: con conteos, un solo proveedor de materiales de construcción concentra casi todo el vector de autoridad y arrastra a gobiernos regionales del sur; con log1p o binario, la cima pasa al submercado de salud. El orden completo de hubs es estable (ρ 0,91 a 0,99); lo que cambia es quién encabeza. No se muestran nombres de proveedores.</div>
+    </section>
+
+    <section class="module" id="comunidades">
+      <p class="kicker">Parte V · Comunidades <span class="pill">2 pts</span></p>
+      <h2>Muchos mercados cerrados, separados por rubro</h2>
+      <p class="question">¿La red de co-participación se separa más de lo que explican el tamaño de los procesos y la recurrencia de los participantes? Elige el contraste y el método.</p>
+      <div class="controls">
+        <label>Contraste comunitario
+          <select id="community-view">
+            <option value="louvain">Louvain frente al nulo Curveball</option>
+            <option value="bigclam">BigCLAM y solapamiento</option>
+            <option value="closure">Cierre y concentración</option>
+          </select>
+        </label>
+      </div>
+      <div class="cards">
+        <div class="card"><h3 id="community-metric-label">Modularidad Puno</h3><div id="community-metric" class="number">0,612</div></div>
+        <div class="card"><h3 id="community-reference-label">Nulo, percentiles 2,5 y 97,5</h3><div id="community-reference" class="number">[0,078; 0,080]</div></div>
+        <div class="card"><h3 id="community-read-label">Interpretación</h3><div id="community-read">Fragmentación superior al nulo</div></div>
+      </div>
+      <div class="chart" id="community-chart"></div>
+      <p id="community-finding" class="reading">En Puno, la estructura comunitaria observada excede claramente lo que explican tamaños de proceso y recurrencia.</p>
+
+      <h3>El núcleo de Puno coloreado por método</h3>
+      <div class="controls">
+        <label>Método
+          <select id="core-method">
+            <option value="louvain:1.0">Louvain</option>
+            <option value="spectral:5">Espectral (k = 5)</option>
+            <option value="gn">Girvan-Newman</option>
+            <option value="bigclam">BigCLAM (solapamiento)</option>
+          </select>
+        </label>
+        <label id="gn-wrap" hidden>Comunidades de Girvan-Newman <output id="gn-out">5</output>
+          <input id="gn-level" type="range" min="1" max="19" step="1" value="4">
+        </label>
+      </div>
+      <div class="legend" id="core-legend"></div>
+      <div class="chart" id="core-chart"></div>
+      <p class="chart-note" id="core-note"></p>
+
+      <h3>Métodos comparados</h3>
+      <div class="table-wrap"><table id="methods-table"></table></div>
+      <div class="reading"><strong>Lectura</strong>Los participantes de Puno se agrupan mucho más de lo que explican el tamaño de los procesos y su recurrencia, y lo hacen por rubro (AMI 0,52) más que por provincia (0,11): dentro de un departamento, el mercado se divide por especialidad. El espectral alcanza la modularidad de Louvain aunque coinciden poco nodo a nodo. Girvan-Newman solo es viable en el núcleo y su mejor Q queda lejos, porque al cortar puentes aísla grupos pequeños. En la red nacional, Louvain cambia levemente con el orden en que se insertan las aristas (Q 0,627 a 0,629 con resolución 1,5), que Spark no fija.</div>
+      <div class="limit" id="bigclam-limit"><strong>BigCLAM no convergió formalmente.</strong> Para K ≥ 30 todas las corridas, incluida la elegida (K = 50), llegaron al tope de 300 iteraciones. En la última iteración la log-verosimilitud cambia <span id="bc-rel">2,6×10⁻⁵</span> en términos relativos, frente al criterio de 1×10⁻⁵: está en meseta, pero no es un óptimo verificado. Por eso tratamos sus afiliaciones como análisis de sensibilidad descriptivo: lo que se sostiene entre semillas es que cerca de la mitad de los participantes compite en varios submercados; la proporción exacta depende del umbral de pertenencia.</div>
+      <details>
+        <summary>Escalabilidad</summary>
+        <p>Girvan-Newman recalcula la intermediación de todas las aristas tras cada corte: con m aristas y n nodos cuesta del orden de m²n, inviable en 1,7 millones de aristas. Por eso se aplica a un núcleo elegido a propósito (los nodos de mayor fuerza), que no es una muestra representativa. Louvain y el espectral disperso escalan al grafo de Puno, y Louvain a la red nacional. BigCLAM actualiza cada nodo con sus vecinos y es lineal en aristas por iteración. En python-louvain la resolución distinta de 1 no se comporta de forma monótona en esta red, así que el contraste con el nulo se repitió con resolución 1,0.</p>
+      </details>
+    </section>
+
+    <section class="module" id="cierre">
+      <p class="kicker">P1 y P2 juntas</p>
+      <h2>¿Los mercados cerrados son los más concentrados?</h2>
+      <p class="question">Para cada unidad de P1, el cierre es la proporción de sus participaciones que pertenece a la comunidad más frecuente de la red nacional. El exceso es el HHI observado menos su valor esperado si el ganador de cada proceso fuera uno de sus participantes al azar.</p>
+      <div class="cards">
+        <div class="card"><h3>ρ cierre – HHI (bruto)</h3><div class="number" id="cl-rho-raw">0,184</div><p class="muted" id="cl-rho-raw-ci"></p></div>
+        <div class="card"><h3>Mismo ρ con ganador al azar</h3><div class="number" id="cl-null-raw">0,207</div><p class="muted" id="cl-null-share"></p></div>
+        <div class="card"><h3>Unidades con exceso positivo</h3><div class="number" id="cl-excess">68 %</div><p class="muted" id="cl-excess-hhi"></p></div>
+        <div class="card"><h3>ρ cierre – exceso</h3><div class="number" id="cl-excess-rho">0,020</div><p class="muted" id="cl-excess-ci"></p></div>
+      </div>
+      <p class="chart-title">Cierre comunitario frente al exceso de HHI (unidades con 10 o más procesos)</p>
+      <div class="chart" id="closure-chart"></div>
+      <div class="reading"><strong>Lectura</strong>Sí: más cierre, más concentración. Pero si el ganador se sortea entre los mismos participantes, la asociación esperada es casi igual y la observada no la supera. En nivel, dos tercios de las unidades concentran más que el azar, y ese exceso no se asocia con el cierre. El azar uniforme es solo un punto de comparación, no un modelo de cómo se adjudica: el exceso no indica irregularidad ni identifica causas.</div>
+    </section>
+
+    <section class="module" id="representacion">
+      <p class="kicker">Parte VI · Representación en grafos <span class="pill">3 pts</span></p>
+      <h2>Embeddings: ¿qué captan y coinciden con lo anterior?</h2>
+      <p class="question">Cada comprador se representa por los participantes recurrentes que aparecen en sus procesos (SVD de 64 componentes sobre la matriz comprador × participante); t-SNE lo lleva a dos dimensiones. Se colorean las tres categorías más grandes; el resto, en gris.</p>
+      <div class="controls">
+        <label>Colorear por
+          <select id="emb-color">
+            <option value="kmeans">Grupos KMeans del embedding</option>
+            <option value="profile">Perfil de la Parte II</option>
+            <option value="community">Comunidad de la Parte V</option>
+            <option value="department">Departamento</option>
+          </select>
+        </label>
+        <label id="emb-k-wrap">k <output id="emb-k-out">10</output>
+          <input id="emb-k" type="range" min="2" max="10" step="1" value="10">
+        </label>
+      </div>
+      <div class="two">
+        <div>
+          <div class="legend" id="emb-legend"></div>
+          <div class="chart" id="emb-chart"></div>
+        </div>
+        <div>
+          <p class="chart-title">Coincidencia (AMI) de los grupos del embedding con cada etiqueta</p>
+          <div class="legend"><span><i class="bg1"></i>Departamento</span><span><i class="bg2"></i>Comunidad</span><span><i class="bg3"></i>Perfil</span></div>
+          <div class="chart" id="emb-ami"></div>
+          <p class="chart-note" id="emb-sil"></p>
+        </div>
+      </div>
+      <div class="two">
+        <div>
+          <p class="chart-title">Energía de cada comprador que captura el SVD (mediana)</p>
+          <div class="bars" id="svd-bars"></div>
+        </div>
+        <div>
+          <p class="chart-title">Sensibilidad al umbral de energía (KMeans, k = 10)</p>
+          <div class="table-wrap"><table id="energy-table"></table></div>
+        </div>
+      </div>
+      <div class="reading"><strong>Lectura</strong>El primer SVD, sobre la matriz de adjudicaciones, no sirve: la energía capturada por comprador es casi nula, porque pocos proveedores adjudican a más de un comprador. Sobre la matriz de participantes recurrentes la mediana sube a 14 %. El embedding capta territorio: con k = 10 la AMI es 0,51 con el departamento, 0,29 con la comunidad y 0,12 con el perfil, y la conclusión se mantiene con los otros umbrales. La coincidencia con las comunidades es interna, porque ambas salen de la misma participación. La silueta es baja y crece con k: no hay un óptimo dentro del rango 2 a 10.</div>
+      <div class="limit"><strong>Límite.</strong> Quedan fuera los compradores mal representados (energía menor a 0,05), sobre todo de servicios y no competitivos; el embedding no representa a todos por igual.</div>
+    </section>
+
+    <section class="module" id="etica">
+      <p class="kicker">Parte VII · Discusión y ética <span class="pill">3 pts</span></p>
+      <h2>Qué aportó cada técnica, y qué no</h2>
+      <div class="cards">
+        <div class="card"><h3>Aportaron más</h3><p>Los estratos y nulos de P1, Louvain con su modelo nulo, el cierre comunitario y el exceso de HHI frente al azar: juntos responden las dos preguntas. Los sustitutos por contenido, validados fuera de tiempo, mostraron competidores plausibles.</p></div>
+        <div class="card"><h3>Aportaron poco</h3><p>PageRank repite la fuerza en una red no dirigida. HITS depende del peso y lo domina un solo proveedor. El SVD de adjudicaciones no representa a la mayoría de compradores, y el híbrido no supera a ALS.</p></div>
+        <div class="card"><h3>Convergencia</h3><p>Parcial. Comunidades y embeddings, que salen de la participación, coinciden entre sí y con el territorio. Los perfiles, que salen de qué se compra, coinciden poco con ambos: son dos vistas distintas del mismo mercado.</p></div>
+        <div class="card"><h3>Escala</h3><p>Spark fue indispensable para aplanar los releases y proyectar la co-participación. Louvain, el espectral disperso y BigCLAM escalaron al subgrafo departamental o a la red nacional; Girvan-Newman exigió un núcleo de 120 nodos y varios minutos. Con todo el histórico habría que mover la proyección y Louvain a GraphFrames y reemplazar t-SNE por un embedding incremental.</p></div>
+      </div>
+      <h3>Encuadre ético</h3>
+      <div class="cards">
+        <div class="card"><h3>Señales, no acusaciones</h3><p>Concentración, cierre, atipicidad o afinidad inusual tienen explicaciones legítimas: proveedor único en la zona, especialidad técnica, financiamiento externo, entidades pequeñas.</p></div>
+        <div class="card"><h3>Sin nombres de proveedores</h3><p>Se nombran entidades públicas, nunca proveedores ni participantes: cerca del 20 % son personas naturales. Los datos de esta página no incluyen sus identificadores. Aun así, una red ponderada podría permitir reidentificar a algunos actores, así que no prometemos anonimato.</p></div>
+        <div class="card"><h3>Límites de la fuente</h3><p>Participantes reportados, no ofertas validadas. La publicación excluye contrataciones sin procedimiento de selección, así que nada de esto se generaliza a todo el gasto público.</p></div>
+      </div>
+    </section>
+
+    <section class="module" id="reproducir">
+      <p class="kicker">Código y reproducibilidad</p>
+      <h2>Cómo se reproduce</h2>
+      <p>Requisitos: Python 3.12, Java 17 y las dependencias fijadas en <code>requirements.txt</code>. La revisión no descarga ni recalcula datos; el pipeline solo se ejecuta bajo petición y por etapas.</p>
+      <pre>python scripts/run_project.py review --delivery   # entorno, pruebas, estilo y cifras
+python scripts/run_project.py pipeline --all --dry-run
+python scripts/run_project.py pipeline web         # exporta y publica web/data/</pre>
+      <p>Esta página es HTML y JavaScript sin dependencias. Lee JSON precalculados en <code>web/data/</code> y solo recalcula en el navegador métricas baratas (Spearman, PageRank del núcleo). Los datos públicos excluyen identificadores y nombres de proveedores y participantes; <code>src/web/publish_web_data.py</code> se detiene si los encuentra.</p>
+      <p>Equipo: Ronaldo Dylan Flores Soto, Rodo Vilcarromero e Isaac Vera Romero. Código y registro de contribuciones en el <a href="https://github.com/ronaldoFlores3552/ProyectoIntegracion2">repositorio</a>.</p>
+      <footer id="data-footer">Fuente: OCDS Perú, OECE/OSCE, publicación 135 de Open Contracting Partnership (CC BY 4.0), y Listado de ofertantes de OECE (ODC-By). Adjudicaciones con fecha en 2023 y 2024.</footer>
+    </section>
+  </main>
+</div>
+<div id="tip" hidden></div>
+
+<script>
+// Síntesis congelada: permite leer los tres controles mínimos aunque fallen los JSON.
+const reference = {
+  p1: { results: [
+    { scenario: 'all_awards', participation_measure: 'reported_participants_median', minimum_processes: 10, adjustment: 'raw', correlation: -0.2281657967, units: 821, ci_low: -0.3022920367, ci_high: -0.1579988318 },
+    { scenario: 'all_awards', participation_measure: 'reported_participants_median', minimum_processes: 10, adjustment: 'stratum_centered', correlation: -0.0503362205, units: 535, ci_low: -0.137436111, ci_high: 0.0629067057 }
+  ], null: [] },
+  communities: {
+    null: { observed_modularity: 0.6115438435, null_percentile_2_5: 0.0777794044, null_percentile_97_5: 0.0800907612 },
+    bigclam: { share_nodes_overlapping: 0.5026260504, selected_communities: 50, final_converged: false, final_iterations: 300 }
+  },
+  findings: {
+    closure_excess: [{ minimum_processes: 10, adjustment: 'raw', share_positive_excess: 0.6790123457 }],
+    hits_summary: [{ weight: 'conteo', top_authority_mass: 0.8379742328 }, { weight: 'log1p', top_authority_mass: 0.042159609 }, { weight: 'binario', top_authority_mass: 0.0122784486 }]
+  }
+};
+// NDCG@10 de ALS en validación 2023 (artifacts/recommendation_als/_metadata.json, controlado
+// por scripts/cifras_entrega.json). No forma parte de los JSON exportados.
+const ALS_VALIDATION_NDCG10 = 0.0557783937;
+const PROFILE_NAMES_K5 = ['Obras', 'Grandes diversificados', 'Servicios', 'Bienes', 'Mayormente no competitivo'];
+const DATA = {};
+const state = { ...reference };
+
+const by = id => document.getElementById(id);
+const NS = 'http://www.w3.org/2000/svg';
+const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+function fmt(value, digits = 3) {
+  if (value === null || value === undefined || !Number.isFinite(Number(value))) return '—';
+  const v = Number(value);
+  const [int, frac] = Math.abs(v).toFixed(digits).split('.');
+  const sign = v < 0 && Number(Math.abs(v).toFixed(digits)) !== 0 ? '−' : '';
+  return sign + int.replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + (frac ? ',' + frac : '');
+}
+const pct = (value, digits = 1) => Number.isFinite(Number(value)) && value !== null ? `${fmt(100 * Number(value), digits)} %` : '—';
+const interval = (low, high, digits = 3) => low == null ? 'No estimado' : `[${fmt(low, digits)}; ${fmt(high, digits)}]`;
+const segName = code => (DATA.segments || {})[String(code)] || `Segmento ${code}`;
+
+// ---------- estadística ----------
+function ranks(values) {
+  const order = values.map((_, i) => i).sort((a, b) => values[a] - values[b]);
+  const result = new Array(values.length);
+  for (let i = 0; i < order.length;) {
+    let j = i;
+    while (j + 1 < order.length && values[order[j + 1]] === values[order[i]]) j++;
+    for (let k = i; k <= j; k++) result[order[k]] = (i + j) / 2 + 1;
+    i = j + 1;
+  }
+  return result;
+}
+function pearson(a, b) {
+  const n = a.length, ma = a.reduce((s, v) => s + v, 0) / n, mb = b.reduce((s, v) => s + v, 0) / n;
+  let sab = 0, saa = 0, sbb = 0;
+  for (let i = 0; i < n; i++) { const x = a[i] - ma, y = b[i] - mb; sab += x * y; saa += x * x; sbb += y * y; }
+  return saa && sbb ? sab / Math.sqrt(saa * sbb) : NaN;
+}
+const spearman = (a, b) => a.length < 3 ? NaN : pearson(ranks(a), ranks(b));
+function median(values) {
+  const s = [...values].sort((x, y) => x - y), m = s.length >> 1;
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+}
+
+// ---------- utilidades de gráficos ----------
+function svgEl(tag, attrs = {}, parent) {
+  const node = document.createElementNS(NS, tag);
+  for (const [k, v] of Object.entries(attrs)) node.setAttribute(k, v);
+  if (parent) parent.appendChild(node);
+  return node;
+}
+function linear(d0, d1, r0, r1) { return v => r0 + (v - d0) / ((d1 - d0) || 1) * (r1 - r0); }
+function logScale(d0, d1, r0, r1) { const a = Math.log10(d0), b = Math.log10(d1); return v => r0 + (Math.log10(Math.max(v, d0)) - a) / ((b - a) || 1) * (r1 - r0); }
+function ticks(d0, d1, count = 5) {
+  const raw = (d1 - d0) / count, mag = 10 ** Math.floor(Math.log10(raw)), err = raw / mag;
+  const step = mag * (err >= 7.5 ? 10 : err >= 3.5 ? 5 : err >= 1.5 ? 2 : 1);
+  const out = [];
+  for (let v = Math.ceil(d0 / step) * step; v <= d1 + step * 1e-9; v += step) out.push(Number(v.toFixed(10)));
+  return out;
+}
+function plot(container, o) {
+  // El SVG usa el ancho real del contenedor para que el texto conserve su tamaño.
+  const W = Math.max(280, Math.round(container.clientWidth || 640)), m = { t: 12, r: 14, b: 44, l: 54, ...(o.margin || {}) };
+  const H = Math.round(Math.min(o.height || 340, Math.max(200, W * 0.75)));
+  container.innerHTML = '';
+  const svg = svgEl('svg', { viewBox: `0 0 ${W} ${H}`, role: 'img', 'aria-label': o.label || '' }, container);
+  const X = (o.xLog ? logScale : linear)(o.x[0], o.x[1], m.l, W - m.r);
+  const Y = (o.yLog ? logScale : linear)(o.y[0], o.y[1], H - m.b, m.t);
+  const axis = svgEl('g', { class: 'axis' }, svg);
+  const yTicks = o.yTicks || ticks(o.y[0], o.y[1], 5), xTicks = o.xTicks || ticks(o.x[0], o.x[1], 6);
+  yTicks.forEach(v => {
+    svgEl('line', { class: 'gridline', x1: m.l, x2: W - m.r, y1: Y(v), y2: Y(v) }, axis);
+    svgEl('text', { x: m.l - 6, y: Y(v) + 4, 'text-anchor': 'end' }, axis).textContent = (o.yFmt || fmtTick)(v);
+  });
+  xTicks.forEach(v => { svgEl('text', { x: X(v), y: H - m.b + 16, 'text-anchor': 'middle' }, axis).textContent = (o.xFmt || fmtTick)(v); });
+  if (xTicks.length) svgEl('line', { class: 'gridline', x1: m.l, x2: W - m.r, y1: H - m.b, y2: H - m.b }, axis);
+  if (o.xLabel) svgEl('text', { class: 'axis-label', x: (m.l + W - m.r) / 2, y: H - 6, 'text-anchor': 'middle' }, svg).textContent = o.xLabel;
+  if (o.yLabel) svgEl('text', { class: 'axis-label', x: -(m.t + H - m.b) / 2, y: 14, transform: 'rotate(-90)', 'text-anchor': 'middle' }, svg).textContent = o.yLabel;
+  return { svg, X, Y, W, H, m };
+}
+function fmtTick(v) { return Math.abs(v) >= 1000 ? fmt(v, 0) : fmt(v, Math.abs(v) < 1 && v !== 0 ? (String(v).split('.')[1] || '').length : 0); }
+function dots(p, points, radius = 3) {
+  const layer = svgEl('g', {}, p.svg);
+  const ordered = points.filter(d => !d.g).concat(points.filter(d => d.g));
+  ordered.forEach(d => {
+    const c = svgEl('circle', { class: `dot c${d.g || 0}`, cx: p.X(d.x), cy: p.Y(d.y), r: d.r || radius, 'fill-opacity': d.g ? 0.85 : 0.55 }, layer);
+    if (d.tip) c.dataset.tip = d.tip;
+  });
+}
+function polyline(p, pts, cls, dashed) {
+  svgEl('path', { class: `line ${cls}`, 'stroke-dasharray': dashed ? '5 4' : '', d: pts.map((q, i) => `${i ? 'L' : 'M'}${p.X(q[0])},${p.Y(q[1])}`).join('') }, p.svg);
+}
+function bars(container, rows, o = {}) {
+  const max = o.max || Math.max(...rows.flatMap(r => r.values.map(v => v.v)), 1e-12);
+  container.innerHTML = rows.map(r => `<div class="bar-row"><span>${esc(r.label)}</span><div class="bar-track">${r.values.map(v => `
+    <div class="bar${v.dim ? ' dim' : ''}" ${v.tip ? `data-tip="${esc(v.tip)}"` : ''}><i class="bg${v.c ?? 1}" style="width:${Math.max(0.3, 100 * v.v / max) * 0.72}%"></i><b>${esc(v.text ?? fmt(v.v))}</b></div>`).join('')}</div></div>`).join('');
+}
+function legend(container, items) {
+  container.innerHTML = items.map(i => `<span><i class="bg${i.c}"></i>${esc(i.label)}</span>`).join('');
+}
+// Las tres categorías más frecuentes reciben un color; el resto queda en gris.
+function topGroups(values, skip = v => v === null || v === '' || v === -1) {
+  const counts = new Map();
+  values.forEach(v => { if (!skip(v)) counts.set(v, (counts.get(v) || 0) + 1); });
+  const top = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 3);
+  return { slot: new Map(top.map(([k], i) => [k, i + 1])), top, counts };
+}
+
+// ---------- tooltip ----------
+const tip = by('tip');
+document.addEventListener('pointermove', event => {
+  const target = event.target.closest ? event.target.closest('[data-tip]') : null;
+  if (!target) { tip.hidden = true; return; }
+  tip.textContent = target.dataset.tip;
+  tip.hidden = false;
+  const x = Math.min(event.clientX + 14, window.innerWidth - tip.offsetWidth - 8);
+  const y = event.clientY + 14 + tip.offsetHeight > window.innerHeight ? event.clientY - tip.offsetHeight - 10 : event.clientY + 14;
+  tip.style.left = `${x}px`; tip.style.top = `${y}px`;
+});
+
+// ---------- tema ----------
+by('theme-toggle').addEventListener('click', () => {
+  const root = document.documentElement;
+  const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  root.dataset.theme = dark ? 'light' : 'dark';
+  try { localStorage.setItem('theme', root.dataset.theme); } catch (e) { /* sin almacenamiento */ }
+});
+try { const saved = localStorage.getItem('theme'); if (saved) document.documentElement.dataset.theme = saved; } catch (e) { /* sin almacenamiento */ }
+
+// ---------- Parte I ----------
+const FLOW = [
+  ['raw', 'Raw OCDS', 'JSONL.GZ 2023–2024', 'Releases compilados de OECE/OSCE. Los descargadores guardan URL, fecha y SHA-256 en un manifiesto; los raw no se modifican.', 'scripts/download_data.py'],
+  ['base', 'Tablas base', 'proceso × adjudicación × proveedor × ítem', 'fact_award_item, fact_award y fact_award_supplier. La clave de adjudicación es process_ocid + award_id; el monto no se reparte entre proveedores ni se suma entre monedas.', 'src/processing/build_fact_award*.py · Spark'],
+  ['part', 'Participación', 'proceso × participante reportado', 'fact_tender (procesos), fact_tenderer (participaciones) y dim_buyer (compradores con departamento). La lista tender.tenderers se separa para no multiplicarla por ítem.', 'src/processing/build_participation.py · Spark'],
+  ['p1', 'Mercados P1', 'comprador × departamento × rubro × modalidad', 'HHI, cuota principal y mediana de participantes calculados sobre el mismo universo de procesos competitivos.', 'src/features/build_market_p1.py · Spark'],
+  ['p2', 'Grafos P2', 'par de participantes recurrentes', 'Bipartitos comprador–proveedor y comprador–participante, y proyección de co-participación con tope de 30 recurrentes por proceso y peso 1/(n−1).', 'src/features/build_market_p2.py · Spark'],
+  ['models', 'Modelos y web', 'artefactos CSV, JSON y Parquet', 'Inferencia local sobre tablas agregadas o subgrafos (bootstrap, nulos, comunidades, clustering, SVD); ALS corre en Spark. La web solo lee JSON curados.', 'src/models/*, src/web/*']
+];
+function flowCount(key) {
+  const s = DATA.summary, p1 = DATA.p1;
+  if (!s) return '';
+  return {
+    part: `${fmt(s.participation.fact_tender, 0)} procesos · ${fmt(s.participation.fact_tenderer, 0)} participaciones · ${fmt(s.participation.dim_buyer, 0)} compradores`,
+    p1: p1 ? `${fmt(p1.metadata.market_units, 0)} unidades · ${fmt(p1.metadata.selected_processes, 0)} procesos competitivos` : '',
+    p2: `${fmt(s.projection.nodes, 0)} nodos · ${fmt(s.projection.undirected_edges, 0)} aristas · densidad ${fmt(s.projection.density, 4)}`,
+    models: `HITS sobre ${fmt(s.hits.buyers, 0)} compradores, ${fmt(s.hits.suppliers, 0)} proveedores y ${fmt(s.hits.edges, 0)} aristas`
+  }[key] || '';
+}
+function renderFlow(selected = 'part') {
+  by('flow').innerHTML = FLOW.map(([key, title, grain]) => `<button type="button" data-key="${key}" aria-pressed="${key === selected}">${esc(title)}<small>${esc(grain)}</small></button>`).join('');
+  const [, title, grain, text, module] = FLOW.find(f => f[0] === selected);
+  const count = flowCount(selected);
+  by('flow-detail').innerHTML = `<strong>${esc(title)} · ${esc(grain)}</strong>${esc(text)}<br><span class="muted">${esc(module)}${count ? ' · ' + esc(count) : ''}</span>`;
+}
+by('flow').addEventListener('click', event => { const b = event.target.closest('button'); if (b) renderFlow(b.dataset.key); });
+function renderSpark() {
+  const s = DATA.summary;
+  if (!s) return;
+  const q = s.projection.degree_quantiles;
+  bars(by('degree-bars'), [['Mínimo', q.min], ['Mediana', q.p50], ['Percentil 90', q.p90], ['Percentil 99', q.p99], ['Máximo', q.max]]
+    .map(([label, v]) => ({ label, values: [{ v, text: fmt(v, 0) }] })));
+  const sizes = s.components.top_component_sizes.slice(0, 5);
+  bars(by('component-bars'), sizes.map((v, i) => ({ label: i ? `Componente ${i + 1}` : 'Gigante', values: [{ v, text: fmt(v, 0), c: i ? 0 : 1 }] })));
+  by('component-note').textContent = `${fmt(s.components.component_count, 0)} componentes; la gigante reúne el ${pct(s.components.largest_component_share)} de los nodos.`;
+  by('st-tenders').textContent = fmt(s.participation.fact_tender, 0);
+  by('st-participations').textContent = fmt(s.participation.fact_tenderer, 0);
+  by('st-buyers').textContent = fmt(s.participation.dim_buyer, 0);
+  by('st-nodes').textContent = fmt(s.projection.nodes, 0);
+}
+
+// ---------- Datos y OECE ----------
+function renderOece() {
+  const o = DATA.oece;
+  if (!o) return;
+  by('oece-matched').textContent = fmt(o.summary.matched_processes, 0);
+  by('oece-bid').textContent = pct(o.summary.reported_that_bid);
+  by('oece-in').textContent = pct(o.summary.bidders_in_reported);
+  const rows = [...o.methods].sort((a, b) => b.processes - a.processes);
+  const max = Math.max(...rows.map(r => r.reported_median));
+  bars(by('oece-bars'), rows.map(r => ({
+    label: `${r.group} (${fmt(r.processes, 0)})`,
+    values: [
+      { v: r.reported_median, c: 1, text: fmt(r.reported_median, 0), tip: `${r.group}\nMediana de reportados: ${fmt(r.reported_median, 0)}\nReportados que ofertaron: ${pct(r.reported_that_bid)}` },
+      { v: r.bidders_median, c: 2, text: fmt(r.bidders_median, 0), tip: `${r.group}\nMediana de ofertantes: ${fmt(r.bidders_median, 0)}\nListas idénticas: ${pct(r.identical_share)}` }
+    ]
+  })), { max });
+}
+
+// ---------- P1 ----------
+function p1Rows() {
+  const source = by('p1-source').value === 'oece' ? DATA.oece?.p1_units : DATA.p1?.units;
+  if (!source) return null;
+  return source.hhi.map((hhi, i) => ({ dep: source.department[i], seg: source.segment[i], met: source.method[i], n: source.processes[i], hhi, part: source.participants[i] }));
+}
+const sizeBand = n => n <= 19 ? '10-19' : n <= 49 ? '20-49' : '50+';
+function p1Compute(rows, adjusted) {
+  if (!adjusted) return { rho: spearman(rows.map(r => r.hhi), rows.map(r => r.part)), rows: rows.map(r => ({ ...r, x: r.hhi, y: r.part })), strata: 0 };
+  const groups = new Map();
+  rows.forEach(r => { const key = [r.dep, r.seg, r.met, sizeBand(r.n)].join('|'); if (!groups.has(key)) groups.set(key, []); groups.get(key).push(r); });
+  const kept = [];
+  let strata = 0;
+  groups.forEach(group => {
+    if (group.length < 3) return;
+    strata += 1;
+    const mh = median(group.map(r => r.hhi)), mp = median(group.map(r => r.part));
+    group.forEach(r => kept.push({ ...r, x: r.hhi - mh, y: r.part - mp }));
+  });
+  return { rho: spearman(kept.map(r => r.x), kept.map(r => r.y)), rows: kept, strata };
+}
+function p1Published(min, adjustment) {
+  const oece = by('p1-source').value === 'oece';
+  const results = oece ? DATA.oece?.p1_results : (state.p1?.results || reference.p1.results);
+  const nulls = oece ? DATA.oece?.p1_null : state.p1?.null;
+  const row = (results || []).find(r => (r.scenario || 'all_awards') === 'all_awards' && (r.participation_measure || 'reported_participants_median') === 'reported_participants_median' && r.minimum_processes === min && r.adjustment === adjustment);
+  const nul = (nulls || []).find(r => r.minimum_processes === min && r.adjustment === adjustment);
+  return { row, nul };
+}
+function p1Result() {
+  const adjustment = by('p1-adjustment').value;
+  return p1Published(Number(by('p1-min').value), adjustment).row;
+}
+function renderP1() {
+  const adjusted = by('p1-adjustment').value === 'stratum_centered';
+  const min = Number(by('p1-min').value);
+  const method = by('p1-method').value;
+  by('p1-min-out').textContent = min;
+  const all = p1Rows();
+  const { row, nul } = p1Published(min, by('p1-adjustment').value);
+  if (!all) {
+    const fallback = p1Result() || reference.p1.results.find(r => r.adjustment === by('p1-adjustment').value);
+    by('p1-rho').textContent = fmt(fallback?.correlation);
+    by('p1-ci').textContent = interval(fallback?.ci_low, fallback?.ci_high);
+    by('p1-chart').innerHTML = '<p class="muted">El gráfico necesita los datos exportados.</p>';
+  } else {
+    const rows = all.filter(r => r.n >= min && r.dep != null && r.seg != null && r.met != null && (!method || r.met === method));
+    const result = p1Compute(rows, adjusted);
+    by('p1-rho').textContent = fmt(result.rho);
+    by('p1-units').textContent = `${fmt(result.rows.length, 0)} unidades${adjusted ? ` en ${fmt(result.strata, 0)} estratos` : ''}`;
+    const exact = !method && row;
+    by('p1-ci').textContent = exact ? interval(row.ci_low, row.ci_high) : 'Solo publicado';
+    by('p1-pub').textContent = exact ? `Publicado ρ = ${fmt(row.correlation)} · 1 000 réplicas` : 'Publicado para todas las modalidades con 10 y 20 procesos';
+    by('p1-null').textContent = !method && nul ? `${fmt(nul.null_mean)} ${interval(nul.null_ci_low, nul.null_ci_high)}` : '—';
+    const pts = result.rows.map(r => ({
+      x: r.x, y: adjusted ? r.y : Math.max(r.part, 1), g: 1, r: 2.6,
+      tip: `${r.dep} · ${segName(r.seg)}\n${r.met} · ${r.n} procesos\nHHI ${fmt(r.hhi)} · participantes (mediana) ${fmt(r.part, 1)}`
+    }));
+    if (pts.length) {
+      const xs = pts.map(d => d.x), ys = pts.map(d => d.y);
+      const opts = adjusted
+        ? { x: [Math.min(...xs), Math.max(...xs)], y: [Math.min(...ys), Math.max(...ys)], xLabel: 'HHI − mediana del estrato', yLabel: 'Participantes − mediana del estrato' }
+        : { x: [0, 1], y: [1, Math.max(...ys)], yLog: true, yTicks: [1, 2, 5, 10, 20, 50, 100, 200].filter(t => t <= Math.max(...ys)), xLabel: 'HHI de adjudicaciones', yLabel: 'Mediana de participantes (escala log)' };
+      const p = plot(by('p1-chart'), { ...opts, label: 'Dispersión de concentración frente a participantes', height: 360 });
+      if (adjusted) {
+        svgEl('line', { class: 'zero', x1: p.X(0), x2: p.X(0), y1: p.m.t, y2: p.H - p.m.b }, p.svg);
+        svgEl('line', { class: 'zero', x1: p.m.l, x2: p.W - p.m.r, y1: p.Y(0), y2: p.Y(0) }, p.svg);
+      }
+      dots(p, pts);
+    } else {
+      by('p1-chart').innerHTML = '<p class="muted">No quedan unidades con esta combinación de filtros.</p>';
+    }
+  }
+  by('p1-label').textContent = adjusted ? 'Sin asociación ajustada' : 'Asociación descriptiva';
+  by('p1-finding').textContent = adjusted
+    ? 'Al comparar estratos equivalentes, no hay evidencia de una asociación monotónica entre HHI y participantes.'
+    : 'La asociación bruta es descriptiva; puede reflejar tamaño, rubro, modalidad o territorio.';
+}
+function initP1() {
+  const methods = DATA.p1?.methods || [];
+  by('p1-method').innerHTML = '<option value="">Todas</option>' + methods.map(m => `<option>${esc(m)}</option>`).join('');
+}
+
+// ---------- Parte II ----------
+function profileName(stats) {
+  if (stats.works >= 0.5) return 'Obras';
+  if (stats.nc >= 0.5) return 'Mayormente no competitivo';
+  if (stats.serv >= 0.6) return 'Servicios';
+  if (stats.goods >= 0.6) return 'Bienes';
+  return stats.pc >= 20 ? 'Grandes diversificados' : 'Mixto';
+}
+function clusterLabels() {
+  const pr = DATA.profiles, method = by('cl-method').value;
+  if (method === 'hdbscan') return pr.labels.hdbscan[by('cl-h').value];
+  return pr.labels[method][by('cl-k').value];
+}
+function clusterStats(labels) {
+  const pr = DATA.profiles, groups = new Map();
+  labels.forEach((g, i) => { if (!groups.has(g)) groups.set(g, []); groups.get(g).push(i); });
+  return [...groups.entries()].map(([g, idx]) => {
+    const pick = f => median(idx.map(i => pr.values[f][i]));
+    const s = { g, n: idx.length, pc: median(idx.map(i => pr.raw.process_count[i])), works: pick('amount_fraction_works'), serv: pick('amount_fraction_services'), goods: pick('amount_fraction_goods'), nc: pick('noncompetitive_fraction') };
+    s.name = g === -1 ? 'Ruido' : profileName(s);
+    return s;
+  }).sort((a, b) => (a.g === -1) - (b.g === -1) || b.n - a.n);
+}
+function renderClusters(resetHighlight) {
+  const pr = DATA.profiles;
+  if (!pr) return;
+  const method = by('cl-method').value;
+  by('cl-k-wrap').hidden = method === 'hdbscan';
+  by('cl-h-wrap').hidden = method !== 'hdbscan';
+  by('cl-k-out').textContent = by('cl-k').value;
+  const labels = clusterLabels();
+  const stats = clusterStats(labels);
+  if (resetHighlight) {
+    by('cl-highlight').innerHTML = '<option value="all">Tres grupos más grandes</option>' + stats.filter(s => s.g !== -1).map(s => `<option value="${s.g}">${esc(s.name)} (${fmt(s.n, 0)})</option>`).join('');
+  }
+  const highlight = by('cl-highlight').value;
+  const slot = new Map();
+  if (highlight === 'all') stats.filter(s => s.g !== -1).slice(0, 3).forEach((s, i) => slot.set(s.g, i + 1));
+  else slot.set(Number(highlight), 1);
+  const names = new Map(stats.map(s => [s.g, s.name]));
+  const pts = pr.pca.x.map((x, i) => ({ x, y: pr.pca.y[i], g: slot.get(labels[i]) || 0, r: 2.4, tip: `${names.get(labels[i])} · ${fmt(pr.raw.process_count[i], 0)} procesos\nProveedores distintos: ${fmt(pr.raw.distinct_suppliers[i], 0)}` }));
+  const p = plot(by('cl-chart'), { x: [Math.min(...pr.pca.x), Math.max(...pr.pca.x)], y: [Math.min(...pr.pca.y), Math.max(...pr.pca.y)], xLabel: 'Componente principal 1', yLabel: 'Componente principal 2', label: 'Compradores en el plano PCA', height: 330 });
+  dots(p, pts);
+  legend(by('cl-legend'), [...slot.entries()].map(([g, c]) => ({ c, label: names.get(g) })).concat([{ c: 0, label: 'Resto' }]));
+  by('cl-pca-note').textContent = `PCA explica ${pct(pr.pca_variance[0])} y ${pct(pr.pca_variance[1])} de la varianza; los grupos se calculan en las ocho dimensiones.`;
+  const noise = labels.filter(l => l === -1).length / labels.length;
+  by('cl-table').innerHTML = `<thead><tr><th>Grupo</th><th class="n">Compradores</th><th class="n">Procesos (mediana)</th><th class="n">Obras</th><th class="n">Servicios</th><th class="n">Bienes</th><th class="n">No compet.</th></tr></thead><tbody>` +
+    stats.map(s => `<tr class="${slot.has(s.g) ? 'sel' : ''}"><td>${esc(s.name)}</td><td class="n">${fmt(s.n, 0)}</td><td class="n">${fmt(s.pc, 0)}</td><td class="n">${pct(s.works, 0)}</td><td class="n">${pct(s.serv, 0)}</td><td class="n">${pct(s.goods, 0)}</td><td class="n">${pct(s.nc, 0)}</td></tr>`).join('') +
+    `</tbody>${method === 'hdbscan' ? `<caption class="muted">Ruido: ${pct(noise)} de los compradores.</caption>` : ''}`;
+  // Silueta por k
+  const series = method => pr.metrics.filter(r => r.method === method).map(r => [Number(r.config), r.silhouette]);
+  const all = series('kmeans').concat(series('ward'));
+  const ps = plot(by('cl-sil'), { x: [2, 8], y: [0, Math.max(...all.map(d => d[1])) * 1.1], xTicks: [2, 3, 4, 5, 6, 7, 8], xLabel: 'k', yLabel: 'Silueta', height: 220, label: 'Silueta por k' });
+  polyline(ps, series('kmeans'), 'c1'); polyline(ps, series('ward'), 'c2', true);
+  [['kmeans', 1], ['ward', 2]].forEach(([m, c]) => series(m).forEach(([k, v]) => {
+    const on = method === m && String(k) === by('cl-k').value;
+    svgEl('circle', { class: `dot c${c}`, cx: ps.X(k), cy: ps.Y(v), r: on ? 6 : 4 }, ps.svg).dataset.tip = `${m === 'kmeans' ? 'KMeans++' : 'Ward'} · k = ${k}\nSilueta ${fmt(v)}`;
+  }));
+  renderDendrogram(highlight === 'all' ? null : Number(highlight));
+}
+function renderDendrogram(group) {
+  const d = DATA.profiles.dendrogram;
+  const xs = d.icoord.flat(), ys = d.dcoord.flat();
+  const p = plot(by('cl-dendro'), { x: [Math.min(...xs), Math.max(...xs)], y: [0, Math.max(...ys)], xTicks: [], yLabel: 'Distancia de Ward', height: 220, margin: { b: 20 }, label: 'Dendrograma de Ward' });
+  d.icoord.forEach((ic, i) => svgEl('path', { class: 'line', stroke: 'var(--ink-3)', 'stroke-width': 1, d: ic.map((x, j) => `${j ? 'L' : 'M'}${p.X(x)},${p.Y(d.dcoord[i][j])}`).join('') }, p.svg));
+  // Los resultados del perfil resaltado solo valen para KMeans k = 5, que es la etiqueta de las hojas.
+  const kmeans5 = by('cl-method').value === 'kmeans' && by('cl-k').value === '5';
+  d.leaf_labels.forEach((label, i) => {
+    const on = kmeans5 && group !== null && label === group;
+    svgEl('rect', { class: on ? 'c1' : 'c0', x: p.X(5 + 10 * i) - 2, y: p.H - p.m.b + 3, width: 4, height: on ? 10 : 5 }, p.svg).dataset.tip = PROFILE_NAMES_K5[label] || `Grupo ${label}`;
+  });
+}
+function renderOutliers() {
+  const f = DATA.findings;
+  if (!f) return;
+  const meta = f.outliers_meta;
+  by('outlier-note').textContent = `El 2 % más lejano al centro de su perfil (distancia > ${fmt(meta.threshold, 2)}), entre los ${fmt(meta.eligible_buyers, 0)} compradores con ${meta.min_processes} procesos o más: ${meta.candidates} casos, todos también ruido para HDBSCAN. Se muestran los 15 más lejanos.`;
+  const reason = r => r.replace('log_process_count', 'procesos').replace('log_pen_amount', 'monto').replace('log_distinct_suppliers', 'proveedores distintos').replace('cubso_entropy', 'diversidad de rubros').replace('noncompetitive_fraction', 'proporción no competitiva').replace('amount_fraction_goods', 'proporción en bienes').replace('amount_fraction_services', 'proporción en servicios').replace('amount_fraction_works', 'proporción en obras');
+  by('outlier-table').innerHTML = '<thead><tr><th>Entidad pública</th><th>Departamento</th><th>Perfil</th><th>Rasgo</th><th class="n">Procesos</th><th class="n">Distancia</th></tr></thead><tbody>' +
+    f.outliers.map(o => `<tr><td>${esc(o.buyer_name)}</td><td>${esc(o.department)}</td><td>${esc(PROFILE_NAMES_K5[o.profile] || o.profile)}</td><td>${esc(reason(o.reason))}</td><td class="n">${fmt(o.process_count, 0)}</td><td class="n">${fmt(o.profile_distance, 2)}</td></tr>`).join('') + '</tbody>';
+}
+function initClusters() {
+  const pr = DATA.profiles;
+  if (!pr) return;
+  by('cl-h').innerHTML = Object.keys(pr.labels.hdbscan).map(k => `<option value="${k}">${k.replace(':', ' : ')}</option>`).join('');
+}
+
+// ---------- Parte III ----------
+function renderRecommendation() {
+  const r = DATA.recommendation;
+  if (!r) return;
+  const metric = by('rec-metric').value, k = by('rec-k').value;
+  const test = r.models.recommendation_test;
+  const label = { ndcg: 'NDCG', recall: 'Recall', precision: 'Precisión' }[metric];
+  by('rec-title').textContent = `Prueba 2024, ${label}@${k}`;
+  const models = [['popularidad', 'Popularidad'], ['vecindario', 'Vecindario ítem-ítem'], ['als', 'ALS implícito (16 factores)']];
+  bars(by('rec-bars'), models.map(([key, name]) => {
+    const m = test.metrics_macro[key];
+    return { label: name, values: [{ v: m[k][metric], c: key === 'als' ? 1 : 0, text: fmt(m[k][metric]), tip: `${name}\n${label}@${k}: ${fmt(m[k][metric], 4)}\nCobertura de proveedores: ${pct(m.provider_coverage)}\nEntidades con ranking: ${fmt(m.entities_with_ranking, 0)}` }] };
+  }));
+  by('rec-note').textContent = `${fmt(test.entities_evaluated, 0)} entidades evaluadas; catálogo de ${fmt(test.catalog_size, 0)} proveedores conocidos. Promedio por entidad.`;
+  bars(by('rec-val-bars'), [
+    ['ALS implícito', ALS_VALIDATION_NDCG10, 1],
+    ['Híbrido ALS + TF-IDF', r.models.recommendation_hybrid.metrics_macro['10'].ndcg, 0],
+    ['TF-IDF (contenido)', r.models.recommendation_content.metrics_macro['10'].ndcg, 0]
+  ].map(([name, v, c]) => ({ label: name, values: [{ v, c, text: fmt(v) }] })));
+  const sv = r.substitutes_validation;
+  const names = { sustituto_top1: 'Sustituto más cercano', sustituto_top5: 'Cinco más cercanos', aleatorio_mismo_segmento: 'Al azar, mismo rubro' };
+  bars(by('subs-bars'), sv.map(s => ({ label: names[s.set] || s.set, values: [{ v: s.share_coparticipate, c: s.set === 'aleatorio_mismo_segmento' ? 0 : 1, text: pct(s.share_coparticipate), tip: `${fmt(s.pairs, 0)} pares\nMismo comprador: ${pct(s.share_same_buyer)}` }] })), { max: 1 });
+  const meta = r.substitutes_meta;
+  by('subs-note').textContent = `Vecinos por contenido de ${fmt(meta.suppliers_with_segment, 0)} proveedores, perfiles de ${meta.profile_window[0]} medidos en adjudicaciones posteriores; se excluyen los procesos que cruzan ambos periodos.`;
+  by('unusual-table').innerHTML = '<thead><tr><th>Rubro</th><th class="n">Pares</th><th class="n">Inusuales</th></tr></thead><tbody>' +
+    r.unusual_by_segment.slice(0, 10).map(u => `<tr><td>${esc(segName(u.supplier_segment))}</td><td class="n">${fmt(u.pairs, 0)}</td><td class="n">${pct(u.unusual_share)}</td></tr>`).join('') + '</tbody>';
+}
+
+// ---------- Parte IV ----------
+function pagerank(n, src, tgt, w, d) {
+  const strength = new Float64Array(n), nbr = Array.from({ length: n }, () => []);
+  src.forEach((s, i) => { const t = tgt[i]; strength[s] += w[i]; strength[t] += w[i]; nbr[s].push([t, w[i]]); nbr[t].push([s, w[i]]); });
+  let pr = new Float64Array(n).fill(1 / n);
+  for (let it = 0; it < 200; it++) {
+    const next = new Float64Array(n);
+    let dangling = 0;
+    for (let i = 0; i < n; i++) if (!strength[i]) dangling += pr[i];
+    for (let i = 0; i < n; i++) for (const [j, wij] of nbr[i]) next[i] += pr[j] * wij / strength[j];
+    let diff = 0;
+    for (let i = 0; i < n; i++) { const v = (1 - d) / n + d * (next[i] + dangling / n); diff += Math.abs(v - pr[i]); next[i] = v; }
+    pr = next;
+    if (diff < 1e-12) break;
+  }
+  return { pr: [...pr], strength: [...strength] };
+}
+function coreNetwork(container, colorOf, sizeOf, tipOf, label) {
+  const core = DATA.communities.core;
+  const p = plot(container, { x: [Math.min(...core.x), Math.max(...core.x)], y: [Math.min(...core.y), Math.max(...core.y)], xTicks: [], yTicks: [], height: 420, margin: { t: 10, r: 10, b: 10, l: 10 }, label });
+  const maxW = Math.max(...core.weight);
+  const edges = svgEl('g', {}, p.svg);
+  core.source.forEach((s, i) => {
+    const t = core.target[i];
+    svgEl('line', { class: 'edge', x1: p.X(core.x[s]), y1: p.Y(core.y[s]), x2: p.X(core.x[t]), y2: p.Y(core.y[t]), 'stroke-width': 0.4 + 1.6 * core.weight[i] / maxW, 'stroke-opacity': 0.08 + 0.35 * core.weight[i] / maxW }, edges);
+  });
+  const nodes = core.x.map((x, i) => i).sort((a, b) => (colorOf(a) > 0) - (colorOf(b) > 0));
+  const layer = svgEl('g', {}, p.svg);
+  nodes.forEach(i => { const c = svgEl('circle', { class: `dot c${colorOf(i)}`, cx: p.X(core.x[i]), cy: p.Y(core.y[i]), r: sizeOf(i), 'stroke-width': 1.5 }, layer); c.dataset.tip = tipOf(i); });
+}
+function renderPagerank() {
+  const c = DATA.communities;
+  const d = Number(by('pr-d').value);
+  by('pr-d-out').textContent = fmt(d, 2);
+  if (!c) return;
+  const core = c.core, n = core.x.length;
+  const { pr, strength } = pagerank(n, core.source, core.target, core.weight, d);
+  const top = new Set([...pr.keys()].sort((a, b) => pr[b] - pr[a]).slice(0, 8));
+  const maxPr = Math.max(...pr);
+  by('pr-rho').textContent = fmt(spearman(pr, strength));
+  by('pr-ratio').textContent = `${fmt(maxPr / Math.min(...pr), 1)}×`;
+  coreNetwork(by('pr-chart'), i => top.has(i) ? 2 : 1, i => 2.5 + 9 * Math.sqrt(pr[i] / maxPr),
+    i => `Participante del núcleo (${esc(segName(core.segment[i]))})\nPageRank ${fmt(pr[i], 4)} · fuerza ${fmt(strength[i], 1)}`, 'Núcleo de Puno con PageRank');
+  const links = DATA.links;
+  if (links) {
+    const rhos = links.correlations.map(r => r.spearman_pagerank_strength);
+    by('pr-national').textContent = `${fmt(Math.min(...rhos), 2)} – ${fmt(Math.max(...rhos), 2)}`;
+  }
+}
+function renderHits() {
+  const rows = state.findings?.hits_summary || reference.findings.hits_summary;
+  const selected = by('hits-weight').value;
+  const current = rows.find(row => row.weight === selected) || reference.findings.hits_summary.find(row => row.weight === selected);
+  by('hits-mass').textContent = pct(current?.top_authority_mass);
+  by('hits-label').textContent = selected === 'conteo' ? 'Predomina un nodo con conteos' : 'La concentración cae al atenuar el peso';
+  by('hits-finding').textContent = selected === 'conteo'
+    ? `Con conteos crudos, el primer proveedor concentra el ${pct(current?.top_authority_mass)} de la autoridad; conviene no interpretar ese ranking aisladamente.`
+    : `Con ${selected === 'log1p' ? 'log1p' : 'pesos binarios'}, la masa del primer proveedor baja a ${pct(current?.top_authority_mass)}: la conclusión depende de la ponderación.`;
+  bars(by('hits-bars'), rows.map(row => ({ label: row.weight, values: [{ v: Number(row.top_authority_mass), c: row.weight === selected ? 1 : 0, text: pct(row.top_authority_mass), tip: row.top10_authority_mass != null ? `Diez primeros: ${pct(row.top10_authority_mass)}\nCompradores del primero: ${fmt(row.top_authority_buyers, 0)}` : '' }] })), { max: 1 });
+  const hubs = (state.findings?.hits_top || []).filter(r => r.weight === selected).slice(0, 6);
+  by('hits-table').innerHTML = hubs.length ? '<thead><tr><th class="n">#</th><th>Entidad pública</th><th>Departamento</th><th class="n">Hub</th></tr></thead><tbody>' +
+    hubs.map(h => `<tr><td class="n">${h.rank}</td><td>${esc(h.buyer_name)}</td><td>${esc(h.department)}</td><td class="n">${fmt(h.hub_score)}</td></tr>`).join('') + '</tbody>' : '';
+}
+
+// ---------- Parte V ----------
+function intervalChart(container, rows, label) {
+  const max = Math.max(...rows.map(r => r.observed)) * 1.1;
+  const H = 46 * rows.length + 50;
+  const p = plot(container, { x: [0, max], y: [0, rows.length], yTicks: [], xLabel: label, height: H, margin: { l: 210 }, label });
+  rows.forEach((r, i) => {
+    const y = p.Y(rows.length - i - 0.5);
+    svgEl('text', { class: 'axis-label', x: p.m.l - 10, y: y + 4, 'text-anchor': 'end' }, p.svg).textContent = r.label;
+    svgEl('line', { class: 'gridline', x1: p.m.l, x2: p.W - p.m.r, y1: y, y2: y }, p.svg);
+    svgEl('rect', { class: 'c0', x: p.X(r.low), y: y - 7, width: Math.max(3, p.X(r.high) - p.X(r.low)), height: 14, rx: 3 }, p.svg).dataset.tip = `Nulo: ${interval(r.low, r.high)}`;
+    svgEl('circle', { class: 'dot c1', cx: p.X(r.observed), cy: y, r: 7 }, p.svg).dataset.tip = `Observado: ${fmt(r.observed)}`;
+  });
+}
+function renderCommunity() {
+  const view = by('community-view').value;
+  const communities = state.communities || reference.communities;
+  const nullModel = communities.null || reference.communities.null;
+  const bigclam = communities.bigclam || reference.communities.bigclam;
+  const excess = (state.findings?.closure_excess || reference.findings.closure_excess).find(r => r.minimum_processes === 10 && r.adjustment === 'raw');
+  const content = {
+    louvain: ['Modularidad Puno', fmt(nullModel.observed_modularity), 'Nulo, percentiles 2,5 y 97,5', interval(nullModel.null_percentile_2_5, nullModel.null_percentile_97_5), 'Fragmentación superior al nulo', `En Puno, Louvain alcanza Q = ${fmt(nullModel.observed_modularity)}; ninguna de las ${nullModel.replicates || 50} réplicas del nulo, que conserva cuántos participantes tiene cada proceso y en cuántos está cada participante, se acerca.`],
+    bigclam: ['Participantes en dos o más comunidades', pct(bigclam.share_nodes_overlapping), 'Comunidades (K)', `K = ${bigclam.selected_communities ?? '—'}`, bigclam.final_converged === false ? `Sin convergencia en ${bigclam.final_iterations} iteraciones` : 'Pertenencia múltiple', 'BigCLAM permite que un participante pertenezca a varias comunidades. K se eligió por AUC en pares reservados; la proporción de solapados es estable entre semillas pero depende del umbral de pertenencia.'],
+    closure: ['Exceso positivo de HHI', pct(excess?.share_positive_excess, 0), 'Referencia', 'Ganador sorteado', 'Sin asociación adicional', 'El cierre comunitario se asocia con la concentración tanto como lo haría con ganadores al azar; el exceso de concentración no se asocia con el cierre.']
+  }[view];
+  by('community-read-label').textContent = 'Interpretación';
+  ['community-metric-label', 'community-metric', 'community-reference-label', 'community-reference', 'community-read', 'community-finding'].forEach((id, index) => { by(id).textContent = content[index]; });
+  const chart = by('community-chart');
+  const c = DATA.communities, f = DATA.findings, o = DATA.oece;
+  if (!c || !f || !o) { chart.innerHTML = ''; return; }
+  if (view === 'louvain') {
+    intervalChart(chart, [
+      { label: 'Puno, resolución 1,5', observed: c.null.observed_modularity, low: c.null.null_percentile_2_5, high: c.null.null_percentile_97_5 },
+      { label: 'Puno, resolución 1,0', observed: f.null_r1.observed_modularity, low: f.null_r1.null_percentile_2_5, high: f.null_r1.null_percentile_97_5 },
+      { label: 'Puno, solo ofertantes OECE', observed: o.p2_null.observed_modularity, low: o.p2_null.null_percentile_2_5, high: o.p2_null.null_percentile_97_5 }
+    ], 'Modularidad Q: observada (punto) frente al nulo (barra gris)');
+  } else if (view === 'bigclam') {
+    const sel = c.bigclam_selection;
+    chart.innerHTML = '<div class="two"><div><p class="chart-title">Elección de K: AUC en pares reservados</p><div class="legend"><span><i class="bg1"></i>Convergió</span><span><i class="bg2"></i>Llegó a 300 iteraciones</span></div><div id="bc-k"></div></div><div><p class="chart-title">Log-verosimilitud de la corrida final (K = 50)</p><div id="bc-trace"></div></div></div><p class="chart-title">Sensibilidad: participantes en dos o más comunidades</p><div class="table-wrap"><table id="bc-sens"></table></div>';
+    const p = plot(by('bc-k'), { x: [0, 100], y: [0.92, 0.985], xLabel: 'K', yLabel: 'AUC', height: 230, label: 'AUC por K' });
+    polyline(p, sel.map(s => [s.communities, s.heldout_auc]), 'c0');
+    sel.forEach(s => {
+      const on = s.communities === c.bigclam.selected_communities;
+      svgEl('circle', { class: `dot c${s.converged ? 1 : 2}`, cx: p.X(s.communities), cy: p.Y(s.heldout_auc), r: on ? 7 : 4.5 }, p.svg).dataset.tip = `K = ${s.communities}\nAUC ${fmt(s.heldout_auc)} · AP ${fmt(s.heldout_average_precision)}\n${s.iterations} iteraciones · ${s.converged ? 'convergió' : 'sin convergencia'}`;
+    });
+    const t = c.bigclam_trace;
+    const ys = t.loglik.slice(2);
+    const pt = plot(by('bc-trace'), { x: [0, 300], y: [Math.min(...ys), Math.max(...ys)], xLabel: 'Iteración', yLabel: 'Log-verosimilitud', height: 230, label: 'Traza de log-verosimilitud', yFmt: v => fmt(v / 1000, 0) + ' mil', margin: { l: 70 } });
+    polyline(pt, t.iteration.slice(2).map((it, i) => [it, ys[i]]), 'c1');
+    const factors = [...new Set(c.bigclam_sensitivity.map(s => s.threshold_factor))];
+    by('bc-sens').innerHTML = '<thead><tr><th>Umbral de pertenencia</th><th class="n">Solapados (semillas 7, 42, 99)</th><th class="n">Sin comunidad</th></tr></thead><tbody>' + factors.map(fac => {
+      const rows = c.bigclam_sensitivity.filter(s => s.threshold_factor === fac);
+      const ov = rows.map(r => r.share_nodes_overlapping), none = rows.map(r => r.share_nodes_without_community);
+      return `<tr class="${fac === 1 ? 'sel' : ''}"><td>${fac === 1 ? 'Elegido' : fac < 1 ? 'Mitad' : 'Doble'} (${fmt(rows[0].threshold, 3)})</td><td class="n">${pct(Math.min(...ov))} – ${pct(Math.max(...ov))}</td><td class="n">${pct(Math.min(...none))} – ${pct(Math.max(...none))}</td></tr>`;
+    }).join('') + '</tbody>';
+  } else {
+    const res = f.closure_results.filter(r => r.minimum_processes === 10);
+    const nul = f.closure_null.filter(r => r.minimum_processes === 10);
+    intervalChart(chart, res.map(r => {
+      const nn = nul.find(x => x.adjustment === r.adjustment);
+      return { label: r.adjustment === 'raw' ? 'Cierre – HHI, bruto' : 'Cierre – HHI, centrado', observed: r.correlation, low: nn.null_p025, high: nn.null_p975 };
+    }), 'ρ de Spearman observado (punto) frente a ganadores al azar (barra gris)');
+  }
+}
+function renderCore() {
+  const c = DATA.communities;
+  if (!c) return;
+  const core = c.core, method = by('core-method').value;
+  by('gn-wrap').hidden = method !== 'gn';
+  const level = by('gn-level').value;
+  const runs = c.partition_runs.filter(r => r.scope === 'core');
+  let colorOf, legendItems, note;
+  if (method === 'bigclam') {
+    const count = i => core.bigclam[i].length;
+    colorOf = i => count(i) === 0 ? 0 : count(i) === 1 ? 1 : 2;
+    legendItems = [{ c: 1, label: 'Una comunidad' }, { c: 2, label: 'Dos o más' }, { c: 0, label: 'Ninguna' }];
+    const multi = core.bigclam.filter(m => m.length > 1).length;
+    note = `En el núcleo, ${fmt(multi, 0)} de ${core.x.length} participantes pertenecen a dos o más comunidades de BigCLAM.`;
+  } else {
+    const labels = method === 'gn' ? core.gn[level] : core.methods[method];
+    const groups = topGroups(labels);
+    colorOf = i => groups.slot.get(labels[i]) || 0;
+    legendItems = groups.top.map(([g, n], i) => ({ c: i + 1, label: `Comunidad ${g} (${n})` })).concat([{ c: 0, label: 'Resto' }]);
+    const k = new Set(labels).size;
+    if (method === 'gn') {
+      const lv = c.gn_levels.find(l => String(l.level) === level);
+      by('gn-out').textContent = lv.communities;
+      note = `Girvan-Newman con ${lv.communities} comunidades: Q = ${fmt(lv.modularity)}. El mejor nivel tiene ${c.partition_meta.girvan_newman_best.communities} comunidades y Q = ${fmt(c.partition_meta.girvan_newman_best.modularity)}; tardó ${fmt(c.partition_meta.girvan_newman_seconds, 0)} s.`;
+    } else {
+      const run = runs.find(r => `${r.method}:${Number(r.config).toFixed(1)}` === method || `${r.method}:${Number(r.config)}` === method);
+      note = `${k} comunidades${run ? `; Q = ${fmt(run.modularity)} en ${fmt(run.seconds, 3)} s` : ''}.`;
+    }
+  }
+  legend(by('core-legend'), legendItems);
+  by('core-note').textContent = note + ' Núcleo de 120 participantes de mayor fuerza en Puno: no es una muestra representativa.';
+  coreNetwork(by('core-chart'), colorOf, () => 4.5, i => `Rubro dominante: ${segName(core.segment[i])}`, 'Núcleo de Puno por comunidad');
+}
+function renderMethodsTable() {
+  const c = DATA.communities;
+  if (!c) return;
+  const runs = c.partition_runs;
+  const giantSpectral = runs.filter(r => r.scope === 'giant' && r.method === 'spectral').sort((a, b) => b.modularity - a.modularity)[0];
+  const rows = [
+    ['Louvain (resolución 1,5)', 'Gigante de Puno', runs.find(r => r.scope === 'giant' && r.method === 'louvain')],
+    [`Espectral (mejor k = ${giantSpectral.config})`, 'Gigante de Puno', giantSpectral],
+    ['Louvain (resolución 1,0)', 'Núcleo (120)', runs.find(r => r.scope === 'core' && r.method === 'louvain')],
+    ['Espectral (k = 5)', 'Núcleo (120)', runs.find(r => r.scope === 'core' && r.method === 'spectral')],
+    ['Girvan-Newman (mejor nivel)', 'Núcleo (120)', runs.find(r => r.scope === 'core' && r.method === 'girvan_newman')]
+  ];
+  const ari = c.agreement.find(a => a.scope === 'giant');
+  by('methods-table').innerHTML = '<thead><tr><th>Método</th><th>Grafo</th><th class="n">Comunidades</th><th class="n">Q</th><th class="n">AMI rubro</th><th class="n">AMI provincia</th><th class="n">Segundos</th></tr></thead><tbody>' +
+    rows.map(([name, scope, r]) => `<tr><td>${name}</td><td>${scope}</td><td class="n">${r.communities}</td><td class="n">${fmt(r.modularity)}</td><td class="n">${fmt(r.ami_dominant_segment, 2)}</td><td class="n">${fmt(r.ami_dominant_province, 2)}</td><td class="n">${fmt(r.seconds, r.seconds < 1 ? 3 : 1)}</td></tr>`).join('') +
+    `<tr><td>BigCLAM (K = ${c.bigclam.selected_communities}, solapadas)</td><td>Gigante binario</td><td class="n">${c.bigclam.selected_communities}</td><td class="n">—</td><td class="n" colspan="3">AUC ${fmt(c.bigclam.selected_heldout_auc)} en pares reservados · ${c.bigclam.final_iterations} iteraciones sin convergencia</td></tr></tbody>` +
+    `<caption class="muted">Gigante de Puno: ${fmt(c.partition_meta.giant.nodes, 0)} nodos y ${fmt(c.partition_meta.giant.edges, 0)} aristas. ARI Louvain–espectral: ${fmt(ari.ari, 2)}.</caption>`;
+  by('bc-rel').textContent = `${fmt(c.bigclam_trace.last_relative_change * 1e5, 1)}×10⁻⁵`;
+}
+
+// ---------- P1 y P2 ----------
+function renderClosure() {
+  const f = DATA.findings;
+  if (!f) return;
+  const res = f.closure_results.find(r => r.minimum_processes === 10 && r.adjustment === 'raw');
+  const nul = f.closure_null.find(r => r.minimum_processes === 10 && r.adjustment === 'raw');
+  const ex = f.closure_excess.find(r => r.minimum_processes === 10 && r.adjustment === 'raw');
+  by('cl-rho-raw').textContent = fmt(res.correlation);
+  by('cl-rho-raw-ci').textContent = `IC 95 % ${interval(res.ci_low, res.ci_high)} · ${fmt(res.units, 0)} unidades`;
+  by('cl-null-raw').textContent = fmt(nul.null_mean);
+  by('cl-null-share').textContent = `El nulo iguala o supera lo observado en el ${pct(nul.share_null_at_or_above_observed, 0)} de las réplicas`;
+  by('cl-excess').textContent = pct(ex.share_positive_excess, 0);
+  by('cl-excess-hhi').textContent = `HHI medio ${fmt(ex.mean_observed_hhi)} frente a ${fmt(ex.mean_expected_hhi)} esperado`;
+  by('cl-excess-rho').textContent = fmt(ex.closure_excess_correlation);
+  by('cl-excess-ci').textContent = `IC 95 % ${interval(ex.closure_excess_ci_low, ex.closure_excess_ci_high)}`;
+  const u = f.closure_units;
+  const p = plot(by('closure-chart'), { x: [Math.min(...u.closure), 1], y: [Math.min(...u.excess), Math.max(...u.excess)], xLabel: 'Cierre: proporción en la comunidad más frecuente', yLabel: 'Exceso de HHI sobre el azar', height: 320, label: 'Cierre frente a exceso de HHI' });
+  svgEl('line', { class: 'zero', x1: p.m.l, x2: p.W - p.m.r, y1: p.Y(0), y2: p.Y(0) }, p.svg);
+  dots(p, u.closure.map((x, i) => ({ x, y: u.excess[i], g: 1, r: 2.6, tip: `Cierre ${pct(x, 0)}\nHHI ${fmt(u.hhi[i])} · exceso ${fmt(u.excess[i])}` })));
+}
+
+// ---------- Parte VI ----------
+function renderEmbedding() {
+  const e = DATA.embedding;
+  if (!e) return;
+  const color = by('emb-color').value, k = by('emb-k').value;
+  by('emb-k-wrap').hidden = color !== 'kmeans';
+  by('emb-k-out').textContent = k;
+  const labels = { kmeans: e.kmeans[k], profile: e.profile, community: e.community, department: e.department }[color];
+  const groups = topGroups(labels);
+  const nameOf = v => color === 'profile' ? (PROFILE_NAMES_K5[v] || 'Sin perfil') : color === 'community' ? (v === -1 ? 'Sin comunidad' : `Comunidad ${v}`) : color === 'kmeans' ? `Grupo ${v}` : (v || 'Sin departamento');
+  legend(by('emb-legend'), groups.top.map(([g, n], i) => ({ c: i + 1, label: `${nameOf(g)} (${fmt(n, 0)})` })).concat([{ c: 0, label: 'Resto' }]));
+  const p = plot(by('emb-chart'), { x: [Math.min(...e.x), Math.max(...e.x)], y: [Math.min(...e.y), Math.max(...e.y)], xTicks: [], yTicks: [], height: 380, margin: { t: 6, r: 6, b: 6, l: 6 }, label: 'Embedding t-SNE de compradores' });
+  dots(p, e.x.map((x, i) => ({ x, y: e.y[i], g: groups.slot.get(labels[i]) || 0, r: 2.3, tip: `${e.name[i]}\n${e.department[i]} · ${PROFILE_NAMES_K5[e.profile[i]] || 'sin perfil'}` })));
+  const sel = e.selection;
+  const pa = plot(by('emb-ami'), { x: [2, 10], y: [0, 0.6], xTicks: [2, 4, 6, 8, 10], xLabel: 'k del KMeans sobre el embedding', yLabel: 'AMI', height: 240, label: 'AMI por k' });
+  if (color === 'kmeans') svgEl('line', { class: 'zero', x1: pa.X(+k), x2: pa.X(+k), y1: pa.m.t, y2: pa.H - pa.m.b }, pa.svg);
+  [['ami_department', 'c1', 'Departamento'], ['ami_dominant_community', 'c2', 'Comunidad'], ['ami_profile_cluster', 'c3', 'Perfil']].forEach(([key, cls, name]) => {
+    polyline(pa, sel.map(s => [s.k, s[key]]), cls);
+    sel.forEach(s => { svgEl('circle', { class: `dot ${cls}`, cx: pa.X(s.k), cy: pa.Y(s[key]), r: String(s.k) === k ? 5.5 : 3.5 }, pa.svg).dataset.tip = `${name} · k = ${s.k}\nAMI ${fmt(s[key])}`; });
+  });
+  const row = sel.find(s => String(s.k) === k);
+  by('emb-sil').textContent = `Silueta con k = ${k}: ${fmt(row.silhouette)} (rango ${fmt(Math.min(...sel.map(s => s.silhouette)), 2)} a ${fmt(Math.max(...sel.map(s => s.silhouette)), 2)}). ${fmt(e.metadata.buyers, 0)} compradores; ${fmt(e.metadata.excluded_low_energy, 0)} excluidos por baja energía y ${fmt(e.metadata.buyers_without_matrix_row, 0)} sin participantes recurrentes.`;
+}
+function renderSvd() {
+  const f = DATA.findings, e = DATA.embedding;
+  if (!f || !e) return;
+  const award = f.svd_award.captured_energy_quantiles['0.5'], part = f.svd_participation.captured_energy_quantiles['0.5'];
+  bars(by('svd-bars'), [
+    { label: `Adjudicaciones (${f.svd_award.components} componentes)`, values: [{ v: award, c: 0, text: pct(award, 4) }] },
+    { label: `Participación recurrente (${f.svd_participation.components} componentes)`, values: [{ v: part, c: 1, text: pct(part) }] }
+  ], { max: part });
+  by('energy-table').innerHTML = '<thead><tr><th class="n">Energía mínima</th><th class="n">Compradores</th><th class="n">AMI depto.</th><th class="n">AMI comunidad</th><th class="n">AMI perfil</th></tr></thead><tbody>' +
+    e.energy_sensitivity.map(r => `<tr class="${r.min_energy === e.metadata.min_energy ? 'sel' : ''}"><td class="n">${fmt(r.min_energy, 2)}</td><td class="n">${fmt(r.buyers, 0)}</td><td class="n">${fmt(r.ami_department_k10, 2)}</td><td class="n">${fmt(r.ami_community_k10, 2)}</td><td class="n">${fmt(r.ami_profile_k10, 2)}</td></tr>`).join('') + '</tbody>';
+}
+
+// ---------- carga ----------
+const NAMES = ['summary', 'segments', 'p1', 'oece', 'profiles', 'links', 'communities', 'findings', 'embedding', 'recommendation'];
+async function loadExport(name) {
+  const response = await fetch(`data/${name}.json`);
+  if (!response.ok) throw new Error(`${name}: ${response.status}`);
+  return response.json();
+}
+function safely(fn) { try { fn(); } catch (error) { console.error(error); } }
+async function load() {
+  const loaded = await Promise.allSettled(NAMES.map(loadExport));
+  loaded.forEach((result, index) => { if (result.status === 'fulfilled') DATA[NAMES[index]] = result.value; });
+  ['p1', 'communities', 'findings'].forEach(name => { if (DATA[name]) state[name] = DATA[name]; });
+  const count = Object.keys(DATA).length;
+  by('data-status').textContent = count === NAMES.length
+    ? 'Datos precalculados cargados desde web/data/. Los controles recalculan en tu navegador; nada se reentrena.'
+    : 'No se pudieron cargar todos los datos. Si abriste el archivo directamente, sirve la carpeta web con "python -m http.server" y abre http://localhost:8000. Se muestra la síntesis congelada.';
+  renderFlow();
+  initP1(); initClusters();
+  [renderSpark, renderOece, () => renderClusters(true), renderOutliers, renderRecommendation, renderHits, renderMethodsTable, renderSvd].forEach(safely);
+  renderCharts();
+}
+// Gráficos SVG que dependen del ancho disponible.
+function renderCharts() {
+  [renderP1, () => renderClusters(false), renderPagerank, renderCommunity, renderCore, renderClosure, renderEmbedding].forEach(safely);
+}
+let resizeTimer;
+let lastWidth = window.innerWidth;
+window.addEventListener('resize', () => {
+  if (window.innerWidth === lastWidth) return;
+  lastWidth = window.innerWidth;
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(renderCharts, 200);
+});
+
+by('p1-adjustment').addEventListener('change', renderP1);
+by('p1-min').addEventListener('input', renderP1);
+by('p1-method').addEventListener('change', renderP1);
+by('p1-source').addEventListener('change', renderP1);
+by('cl-method').addEventListener('change', () => renderClusters(true));
+by('cl-k').addEventListener('input', () => renderClusters(true));
+by('cl-h').addEventListener('change', () => renderClusters(true));
+by('cl-highlight').addEventListener('change', () => renderClusters(false));
+by('rec-metric').addEventListener('change', renderRecommendation);
+by('rec-k').addEventListener('change', renderRecommendation);
+by('pr-d').addEventListener('input', renderPagerank);
+by('hits-weight').addEventListener('change', renderHits);
+by('community-view').addEventListener('change', renderCommunity);
+by('core-method').addEventListener('change', renderCore);
+by('gn-level').addEventListener('input', renderCore);
+by('emb-color').addEventListener('change', renderEmbedding);
+by('emb-k').addEventListener('input', renderEmbedding);
+
+// Resalta en el índice la sección visible.
+const links = [...document.querySelectorAll('nav.toc a')];
+const observer = new IntersectionObserver(entries => entries.forEach(entry => {
+  if (entry.isIntersecting) links.forEach(a => a.classList.toggle('active', a.getAttribute('href') === `#${entry.target.id}`));
+}), { rootMargin: '-30% 0px -60% 0px' });
+document.querySelectorAll('main > section, main > header').forEach(s => observer.observe(s));
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+{
+  "published_at_utc": "2026-11-15T08:07:13+00:00",
+  "source": "artifacts/web_data (src.web.export_web_data)",
+  "dropped_keys": {
+    "links.json": [
+      "graph"
+    ]
+  },
+  "files": {
+    "summary.json": {
+      "bytes": 1014,
+      "sha256": "544165b056facbe406f85c6ccd549fe79bb25554292c7b90ff3f17fb5bac68ad"
+    },
+    "segments.json": {
+      "bytes": 1630,
+      "sha256": "0c9ab52052e630247e17498e5080842ffeef5398946adc15bc8ad19a9031e6dc"
+    },
+    "p1.json": {
+      "bytes": 175412,
+      "sha256": "f6c934753c7e1e8478ec49b54eec7563b8fb36dc9d43ec8e5ae2e4bf86dae0fc"
+    },
+    "oece.json": {
+      "bytes": 170172,
+      "sha256": "b06b0bac8e3a76ff806995e8450234b70f0c6ba1d50efdea490bc0a08e3a0856"
+    },
+    "profiles.json": {
+      "bytes": 303512,
+      "sha256": "904dacd94099fbd9575e34157934338f294bcd923a0cb2b92041bb5c44e3aa7e"
+    },
+    "links.json": {
+      "bytes": 3132,
+      "sha256": "633bd746636631a326d637c1e0bf92129328ded325623284c17ac47938e532fb"
+    },
+    "communities.json": {
+      "bytes": 69883,
+      "sha256": "e06f7bd5eeee8c4284e0fa60240b88c17eb761861d0b71ddc20e8c7840f19592"
+    },
+    "findings.json": {
+      "bytes": 29939,
+      "sha256": "d5761905f23b13513a3205cd573c52fda39422f63de4d9460567e046cc88f27a"
+    },
+    "embedding.json": {
+      "bytes": 218989,
+      "sha256": "87565c9b50afa9cc6682c6efba6fa59f548b0ae0cbc450acc27a5e7677d41ea2"
+    },
+    "recommendation.json": {
+      "bytes": 6407,
+      "sha256": "6e258504c9896308bf1efe87f46dc8fc286f081f4843edd73f0fd0884bef249e"
+    }
+  }
+}

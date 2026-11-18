@@ -356,6 +356,25 @@ def communities(artifacts: Path) -> dict:
         "bigclam_communities": json.loads(
             pd.read_csv(artifacts / "p2" / "bigclam" / "communities.csv").to_json(orient="records")
         ),
+        "bigclam_sensitivity": json.loads(
+            pd.read_csv(artifacts / "p2" / "bigclam" / "sensitivity.csv").to_json(orient="records")
+        ),
+        "bigclam_trace": bigclam_trace(
+            artifacts / "p2" / "bigclam" / "optimization_diagnostics.csv"
+        ),
+    }
+
+
+def bigclam_trace(path: Path, step: int = 5) -> dict:
+    """Curva de log-verosimilitud submuestreada y cambio relativo de la última iteración."""
+    history = pd.read_csv(path).sort_values("iteration")
+    shown = history.loc[(history.iteration % step == 0) | (history.index == history.index[-1])]
+    last, previous = history.loglik.iloc[-1], history.loglik.iloc[-2]
+    return {
+        "iteration": shown.iteration.astype(int).tolist(),
+        "loglik": rounded(shown.loglik, 2),
+        "last_relative_change": float(abs(last - previous) / abs(previous)),
+        "relative_tolerance": 1e-5,
     }
 
 

@@ -74,7 +74,13 @@ def staging_dir(output_dir: Path) -> Path:
 
 
 def publish_output(staging: Path, output_dir: Path) -> None:
-    """Replace output_dir with staging only when Spark committed it completely."""
+    """Publish a complete staged directory, including a Windows-safe fallback.
+
+    Spark first writes to ``staging``. A same-volume rename is atomic on the
+    usual platforms. Windows may temporarily reject a directory rename after a
+    JVM or antivirus handle is released; in that case copying the already
+    complete staging directory is safer than leaving the pipeline unusable.
+    """
     if not (staging / "_SUCCESS").is_file():
         raise RuntimeError(f"Spark no dejó _SUCCESS en {staging}; la salida no se publica.")
 
@@ -82,7 +88,20 @@ def publish_output(staging: Path, output_dir: Path) -> None:
     shutil.rmtree(previous, ignore_errors=True)
     if output_dir.exists():
         output_dir.replace(previous)
-    staging.replace(output_dir)
+    try:
+        staging.replace(output_dir)
+    except PermissionError:
+        if os.name != "nt":
+            raise
+        if output_dir.exists():
+            shutil.rmtree(output_dir)
+        shutil.copytree(staging, output_dir)
+        if not (output_dir / "_SUCCESS").is_file():
+            shutil.rmtree(output_dir, ignore_errors=True)
+            raise RuntimeError(
+                f"No se pudo publicar una salida completa en {output_dir}."
+            ) from None
+        shutil.rmtree(staging)
     shutil.rmtree(previous, ignore_errors=True)
 
 

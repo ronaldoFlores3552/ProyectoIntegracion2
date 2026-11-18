@@ -12,7 +12,7 @@ from reportlab.lib.units import inch
 from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
 ROOT = Path(__file__).resolve().parents[1]
-OUTPUT = ROOT / "docs" / "Informe_Proyecto_Integrador_2.pdf"
+OUTPUT = ROOT / "artifacts" / "report" / "Informe_Proyecto_Integrador_2.pdf"
 
 
 def read_json(relative: str) -> dict:
@@ -84,6 +84,7 @@ def add_table(story: list, rows: list[list[str]], widths: list[float], styles: d
 
 
 def main() -> None:
+    OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     p1 = p1_result()
     p1_metadata = read_json("artifacts/p1/analysis/metadata.json")
     links = read_json("artifacts/p2/links/metadata.json")

@@ -19,6 +19,7 @@ REQUIRED_PACKAGES = (
     "pyarrow",
     "scikit-learn",
     "networkx",
+    "openpyxl",
 )
 
 
